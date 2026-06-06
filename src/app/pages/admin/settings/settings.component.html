@@ -1,0 +1,145 @@
+<div class="max-w-4xl mx-auto px-4 font-sans pb-12">
+  <div class="mb-8">
+    <h1 class="text-2xl font-bold text-slate-900">Paramètres Admin</h1>
+    <p class="text-slate-500 text-sm mt-1">
+      Personnalisez votre interface d'administration.
+    </p>
+  </div>
+
+  <div class="space-y-6">
+    <!-- Language Section -->
+    <div class="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+      <div class="px-6 py-4 border-b border-slate-100 flex items-center gap-3">
+        <div class="p-2 rounded-lg bg-[rgba(0,177,186,0.1)]">
+          <lucide-icon name="globe" class="w-5 h-5 text-[#1d4b99]"></lucide-icon>
+        </div>
+        <div>
+          <h2 class="text-base font-bold text-slate-900">Langue</h2>
+          <p class="text-xs text-slate-500">Choisissez la langue de l'interface</p>
+        </div>
+      </div>
+      <div class="p-6 space-y-3">
+        <label *ngFor="let lang of languages" (click)="setSelectedLang(lang.id)"
+          class="flex items-center gap-4 px-4 py-3.5 rounded-xl border-2 cursor-pointer transition-all duration-150"
+          [class.bg-teal-50]="selectedLang() === lang.id"
+          [style.borderColor]="selectedLang() === lang.id ? '#1d4b99' : '#e2e8f0'">
+          <div class="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors"
+            [style.borderColor]="selectedLang() === lang.id ? '#1d4b99' : '#cbd5e1'">
+            <div *ngIf="selectedLang() === lang.id" [@scaleIn] class="w-2.5 h-2.5 rounded-full bg-[#1d4b99]"></div>
+          </div>
+          <span class="text-xl leading-none">{{ lang.flag }}</span>
+          <span class="text-sm font-bold" [style.color]="selectedLang() === lang.id ? '#1d4b99' : '#334155'">
+            {{ lang.label }}
+          </span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Mode Section -->
+    <div class="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+      <div class="px-6 py-4 border-b border-slate-100 flex items-center gap-3">
+        <div class="p-2 rounded-lg bg-amber-50">
+          <lucide-icon name="palette" class="w-5 h-5 text-amber-600"></lucide-icon>
+        </div>
+        <div>
+          <h2 class="text-base font-bold text-slate-900">Mode d'affichage</h2>
+          <p class="text-xs text-slate-500">Choisissez le thème de l'application</p>
+        </div>
+      </div>
+      <div class="p-6">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <lucide-icon [name]="isDarkMode() ? 'moon' : 'sun'" class="w-5 h-5" [class.text-amber-500]="!isDarkMode()"
+              [style.color]="isDarkMode() ? '#1d4b99' : null"></lucide-icon>
+            <div>
+              <p class="text-sm font-bold text-slate-900">
+                {{ isDarkMode() ? 'Mode sombre' : 'Mode clair' }}
+              </p>
+              <p class="text-xs text-slate-500">
+                {{ isDarkMode() ? 'Interface avec fond sombre' : 'Interface avec fond clair' }}
+              </p>
+            </div>
+          </div>
+
+          <!-- Toggle Switch -->
+          <button (click)="toggleDarkMode()"
+            class="relative w-14 h-8 rounded-full transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#1d4b99]"
+            [style.backgroundColor]="isDarkMode() ? '#1d4b99' : '#e2e8f0'" role="switch"
+            [attr.aria-checked]="isDarkMode()">
+            <div
+              class="absolute top-1 w-6 h-6 rounded-full bg-white shadow-sm flex items-center justify-center transition-all duration-300"
+              [style.left]="isDarkMode() ? '1.75rem' : '0.25rem'">
+              <lucide-icon [name]="isDarkMode() ? 'moon' : 'sun'" class="w-3.5 h-3.5"
+                [class.text-amber-500]="!isDarkMode()" [style.color]="isDarkMode() ? '#1d4b99' : null"></lucide-icon>
+            </div>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- About Button -->
+    <div>
+      <button (click)="openAbout()"
+        class="w-full bg-white rounded-xl border border-slate-200 p-6 flex items-center justify-between hover:bg-slate-50 transition-colors text-left shadow-sm">
+        <div class="flex items-center gap-3">
+          <div class="p-2 rounded-lg bg-blue-50">
+            <lucide-icon name="info" class="w-5 h-5 text-blue-600"></lucide-icon>
+          </div>
+          <div>
+            <h2 class="text-base font-bold text-slate-900">À propos</h2>
+            <p class="text-xs text-slate-500">Informations sur l'application et mentions légales</p>
+          </div>
+        </div>
+        <lucide-icon name="chevron-right" class="w-5 h-5 text-slate-400"></lucide-icon>
+      </button>
+    </div>
+  </div>
+  <!-- About Modal -->
+  <div *ngIf="isAboutModalOpen()">
+    <!-- Backdrop -->
+    <div [@fadeIn] (click)="closeAbout()" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50"></div>
+
+    <!-- Modal Content -->
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div [@modalAnimation] class="w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden">
+        <div class="p-5 border-b border-slate-100 flex justify-between items-center">
+          <h2 class="text-lg font-bold text-slate-900">À propos de UniHelp</h2>
+          <button (click)="closeAbout()"
+            class="text-slate-400 hover:text-slate-600 transition-colors p-1.5 rounded-lg hover:bg-slate-100">
+            <lucide-icon name="x" class="w-5 h-5"></lucide-icon>
+          </button>
+        </div>
+
+        <div class="p-8 space-y-6 text-center">
+          <div class="flex justify-center">
+            <div class="w-20 h-20 rounded-2xl flex items-center justify-center shadow-lg bg-[#1d4b99]"
+              style="box-shadow: 0 10px 25px -5px rgba(0, 175, 185, 0.4)">
+              <lucide-icon name="graduation-cap" class="w-10 h-10 text-white"></lucide-icon>
+            </div>
+          </div>
+
+          <div>
+            <h3 class="text-2xl font-bold text-slate-900">UniHelp</h3>
+            <p class="text-sm text-slate-400 mt-1 font-medium">Version 1.0.0 </p>
+          </div>
+
+          <p class="text-sm text-slate-600 leading-relaxed max-w-sm mx-auto">
+            Assistant IA pédagogique pour les étudiants universitaires.
+            UniHelp vous aide à naviguer votre parcours académique,
+            répondre à vos questions et générer des documents administratifs.
+          </p>
+        </div>
+
+        <div class="px-6 py-4 border-t border-slate-100 bg-slate-50 flex items-center justify-between">
+          <p class="text-xs text-slate-500">
+
+          </p>
+          <button (click)="closeAbout()"
+            class="px-4 py-2 border border-slate-300 rounded-lg text-sm font-bold text-slate-600 hover:bg-white transition-colors">
+            Fermer
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
