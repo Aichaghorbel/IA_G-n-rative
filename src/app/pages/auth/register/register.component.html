@@ -5,10 +5,10 @@
       <div class="mb-8 flex flex-col items-center justify-start">
         <app-uni-help-logo size="lg" [showText]="false" color="#1d4b99"></app-uni-help-logo>
         <span class="mt-6 text-3xl font-bold text-slate-900 tracking-tight">
-          UniHelp
+          SmartCampus
         </span>
         <p class="mt-2 text-slate-600 text-center">
-          Votre assistant intelligent qui simplifie, automatise et optimise les services universitaires
+          Votre assistant intelligent pour l’orientation universitaire
         </p>
       </div>
 
@@ -56,7 +56,8 @@
             <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
               <lucide-icon name="lock" class="h-5 w-5 text-slate-400"></lucide-icon>
             </div>
-            <input [type]="showPassword() ? 'text' : 'password'" name="password" placeholder="Mot de passe" [(ngModel)]="formData.password"
+            <input [type]="showPassword() ? 'text' : 'password'" name="password" placeholder="Mot de passe"
+              [(ngModel)]="formData.password"
               class="block w-full pl-11 pr-12 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm focus:ring-2 focus:ring-[#1d4b99] focus:border-transparent outline-none transition-all font-medium" />
             <button type="button" (click)="showPassword.set(!showPassword())" tabindex="-1"
               class="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-slate-600 focus:outline-none">
@@ -71,11 +72,19 @@
         Suivant
       </button>
 
-      <div class="mt-8 text-center text-sm text-slate-600">
-        Déjà un compte ?
-        <a routerLink="/login" class="font-semibold text-[#1d4b99] hover:text-[#153c80] transition-colors">
-          Se connecter
-        </a>
+      <div class="mt-8 text-center text-sm text-slate-600 space-y-2">
+        <div>
+          Déjà un compte ?
+          <a routerLink="/login" class="font-semibold text-[#1d4b99] hover:text-[#153c80] transition-colors">
+            Se connecter
+          </a>
+        </div>
+        <div class="pt-2 border-t border-slate-100">
+          <span class="text-xs text-slate-500">Vous êtes enseignant ? </span>
+          <a routerLink="/register-enseignant" class="text-xs font-bold text-[#1d4b99] hover:underline">
+            Inscription Enseignant ici &rarr;
+          </a>
+        </div>
       </div>
     </div>
   </app-auth-layout>
@@ -89,7 +98,7 @@
     <div class="flex justify-between items-start mb-4">
       <div>
         <h6 class="text-2xl md:text-3xl font-bold mb-2">
-          Bienvenue sur UniHelp ! Parlez-nous de vous
+          Bienvenue sur SmartCampus ! Parlez-nous de vous
         </h6>
         <!-- <p class="text-teal-100 text-lg">
           Ces informations nous permettront de personnaliser votre assistant IA.
@@ -505,12 +514,13 @@
                     style="background-color:#1d4b99">
                     <lucide-icon name="graduation-cap" class="w-10 h-10 text-white"></lucide-icon>
                   </div>
-                  <span class="text-xl font-bold text-slate-900 tracking-tight">UniHelp</span>
+                  <span class="text-xl font-bold text-slate-900 tracking-tight">SmartCampus</span>
                 </div>
                 <div class="space-y-4 mb-4">
                   <h2 class="text-3xl font-bold text-slate-900">Félicitations !</h2>
                   <p class="text-slate-500 text-base max-w-sm mx-auto">
-                    Votre compte a été créé avec succès. Vous pouvez maintenant profiter de tous les services UniHelp.
+                    Votre compte a été créé avec succès. Vous pouvez maintenant profiter de tous les services
+                    SmartCampus.
                   </p>
                 </div>
               </div>

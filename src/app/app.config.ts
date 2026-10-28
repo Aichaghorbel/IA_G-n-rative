@@ -1,6 +1,8 @@
 import { ApplicationConfig, provideZoneChangeDetection, importProvidersFrom } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideAnimations } from '@angular/platform-browser/animations';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import { authInterceptor } from './interceptors/auth.interceptor';
 import { 
   LucideAngularModule, 
   Mail, Lock, Loader2, GraduationCap, LayoutDashboard, MessageSquare, 
@@ -20,6 +22,7 @@ export const appConfig: ApplicationConfig = {
     provideZoneChangeDetection({ eventCoalescing: true }), 
     provideRouter(routes),
     provideAnimations(),
+    provideHttpClient(withInterceptors([authInterceptor])),
     importProvidersFrom(LucideAngularModule.pick({ 
       Mail, Lock, Loader2, GraduationCap, LayoutDashboard, MessageSquare, 
       User, MailCheck, HelpCircle, Settings, FileText, Users, Shield, 

@@ -308,12 +308,7 @@ export class RegisterComponent {
 
     this.isSubmitting.set(true);
     try {
-      await this.authService.register({
-        name: `${this.formData.firstName} ${this.formData.lastName}`,
-        email: this.formData.email,
-        university: this.formData.university,
-        field: this.formData.desiredDiploma
-      });
+      await this.authService.register(this.formData);
       this.step.set(5);
     } catch (err) {
       this.error.set("Une erreur est survenue lors de l'inscription.");

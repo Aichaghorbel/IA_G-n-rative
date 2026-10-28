@@ -22,14 +22,18 @@ export class LoginComponent {
   constructor(private authService: AuthService, private router: Router) {}
 
   detectRole(email: string): Role {
-    if (email.includes('@admin') || email.toLowerCase().includes('admin')) {
+    const lower = email.toLowerCase();
+    if (lower.includes('@admin') || lower.includes('admin')) {
       return 'admin';
+    }
+    if (lower.includes('@enseignant') || lower.includes('enseignant') || lower.includes('@prof') || lower.includes('prof')) {
+      return 'enseignant';
     }
     return 'student';
   }
 
-  async handleSubmit(e: Event) {
-    e.preventDefault();
+  async handleSubmit(e?: Event) {
+    if (e) e.preventDefault();
     this.error.set('');
 
     if (!this.email || !this.password) {
@@ -39,15 +43,19 @@ export class LoginComponent {
 
     this.isSubmitting.set(true);
     try {
-      const role = this.detectRole(this.email);
-      await this.authService.login(this.email, role);
+      await this.authService.login(this.email, this.password);
+      const user = this.authService.user();
+      const role = user?.role || this.detectRole(this.email);
+
       if (role === 'student') {
         this.router.navigate(['/student/dashboard']);
+      } else if (role === 'enseignant') {
+        this.router.navigate(['/enseignant/dashboard']);
       } else {
         this.router.navigate(['/admin/dashboard']);
       }
-    } catch (err) {
-      this.error.set('Identifiants incorrects. Veuillez réessayer.');
+    } catch (err: any) {
+      this.error.set(err?.message || 'Email ou mot de passe incorrect.');
     } finally {
       this.isSubmitting.set(false);
     }

@@ -1,0 +1,369 @@
+<!-- ══════════════════════════════════════════════════════════
+     STEP 1 — Informations personnelles
+     ══════════════════════════════════════════════════════════ -->
+<ng-container *ngIf="step() === 1">
+  <app-auth-layout>
+    <div class="w-full animate-swipe-in">
+
+      <!-- Logo + Titre -->
+      <div class="mb-8 flex flex-col items-center">
+        <app-uni-help-logo size="lg" [showText]="false" color="#1d4b99"></app-uni-help-logo>
+        <span class="mt-6 text-3xl font-bold text-slate-900 tracking-tight">SmartCampus</span>
+        <p class="mt-2 text-slate-600 text-center">Votre assistant intelligent pour l'orientation universitaire</p>
+      </div>
+
+      <!-- Erreur -->
+      <div *ngIf="error()"
+        class="mb-6 p-3 bg-red-50 text-red-600 text-sm rounded-xl border border-red-100 flex items-center gap-2">
+        <lucide-icon name="alert-circle" class="w-4 h-4 shrink-0 text-red-500"></lucide-icon>
+        <span>{{ error() }}</span>
+      </div>
+
+      <div class="space-y-4">
+        <!-- Nom & Prénom -->
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Nom</label>
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <lucide-icon name="user" class="h-5 w-5 text-slate-400"></lucide-icon>
+              </div>
+              <input type="text" name="lastName" placeholder="Nom" [(ngModel)]="formData.lastName"
+                class="block w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm focus:ring-2 focus:ring-[#1d4b99] focus:border-transparent outline-none transition-all font-medium" />
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Prénom</label>
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <lucide-icon name="user" class="h-5 w-5 text-slate-400"></lucide-icon>
+              </div>
+              <input type="text" name="firstName" placeholder="Prénom" [(ngModel)]="formData.firstName"
+                class="block w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm focus:ring-2 focus:ring-[#1d4b99] focus:border-transparent outline-none transition-all font-medium" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Email -->
+        <div>
+          <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Adresse email</label>
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+              <lucide-icon name="mail" class="h-5 w-5 text-slate-400"></lucide-icon>
+            </div>
+            <input type="email" name="email" placeholder="nom.prenom@smartcampus.tn" [(ngModel)]="formData.email"
+              class="block w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm focus:ring-2 focus:ring-[#1d4b99] focus:border-transparent outline-none transition-all font-medium" />
+          </div>
+        </div>
+
+        <!-- Mot de passe -->
+        <div>
+          <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Mot de passe</label>
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+              <lucide-icon name="lock" class="h-5 w-5 text-slate-400"></lucide-icon>
+            </div>
+            <input [type]="showPassword() ? 'text' : 'password'" name="password" placeholder="••••••••"
+              [(ngModel)]="formData.password"
+              class="block w-full pl-11 pr-12 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm focus:ring-2 focus:ring-[#1d4b99] focus:border-transparent outline-none transition-all font-medium" />
+            <button type="button" (click)="showPassword.set(!showPassword())" tabindex="-1"
+              class="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-slate-600">
+              <lucide-icon [name]="showPassword() ? 'eye-off' : 'eye'" class="w-5 h-5"></lucide-icon>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <button (click)="handleNext()"
+        class="mt-6 w-full flex justify-center py-3.5 px-4 border border-transparent rounded-2xl shadow-lg text-sm font-semibold text-white bg-[#1d4b99] hover:bg-[#153c80] hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#1d4b99]">
+        Suivant
+      </button>
+
+      <div class="mt-8 text-center text-sm text-slate-600 space-y-2">
+        <div>
+          Déjà un compte ?
+          <a routerLink="/login" class="font-semibold text-[#1d4b99] hover:text-[#153c80] transition-colors">Se
+            connecter</a>
+        </div>
+        <div class="pt-2 border-t border-slate-100">
+          <span class="text-xs text-slate-500">Vous êtes étudiant ? </span>
+          <a routerLink="/register" class="text-xs font-bold text-[#1d4b99] hover:underline">Inscription Étudiant ici
+            &rarr;</a>
+        </div>
+      </div>
+    </div>
+  </app-auth-layout>
+</ng-container>
+
+
+<!-- ══════════════════════════════════════════════════════════
+     STEPS 2 & 3 — Profil Académique & Confirmation
+     ══════════════════════════════════════════════════════════ -->
+<div *ngIf="step() > 1"
+  class="min-h-screen bg-gradient-to-br from-[#1d4b99] to-teal-700 flex flex-col font-sans animate-swipe-in">
+
+  <!-- Header -->
+  <div class="p-6 md:pt-10 md:pb-4 max-w-6xl mx-auto w-full text-white">
+    <h1 class="text-2xl md:text-3xl font-bold mb-1">Bienvenue sur SmartCampus ! Profil Enseignant</h1>
+    <p class="text-teal-100 text-sm md:text-base mb-4">Complétez vos détails académiques pour finaliser votre compte.
+    </p>
+
+    <!-- Progress bar -->
+    <div class="mb-2 flex justify-between text-sm font-medium text-teal-100">
+      <span>{{ step() - 1 }} sur 2 complété</span>
+      <span>{{ progressPercentage }}%</span>
+    </div>
+    <div class="w-full h-2 bg-teal-900/30 rounded-full overflow-hidden mb-6">
+      <div class="h-full bg-white transition-all duration-500 ease-out" [style.width.%]="progressPercentage"></div>
+    </div>
+  </div>
+
+  <!-- Main Card -->
+  <div class="flex-1 px-4 md:px-10 pb-10 flex justify-center">
+    <div class="w-full max-w-6xl bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col md:flex-row">
+
+      <!-- Formulaire -->
+      <div class="flex-1 p-6 md:p-10 flex flex-col">
+
+        <!-- Stepper Indicators -->
+        <div class="flex items-center justify-start mb-6 pb-2">
+          <div class="w-8 h-0.5 mx-2 bg-[#1d4b99]"></div>
+          <div class="flex items-center gap-2 shrink-0">
+            <div class="w-4 h-4 rounded-full border-2"
+              [ngClass]="step() >= 2 ? 'border-[#1d4b99] bg-white' : 'border-slate-300'">
+              <div *ngIf="step() >= 2" class="w-full h-full bg-[#1d4b99] rounded-full scale-50"></div>
+            </div>
+            <span class="text-xs font-medium whitespace-nowrap"
+              [ngClass]="step() >= 2 ? 'text-slate-900 font-semibold' : 'text-slate-400'">Profil Académique</span>
+          </div>
+          <div class="w-8 h-0.5 mx-2" [ngClass]="step() > 2 ? 'bg-[#1d4b99]' : 'bg-slate-200'"></div>
+          <div class="flex items-center gap-2 shrink-0">
+            <div class="w-4 h-4 rounded-full border-2"
+              [ngClass]="step() >= 3 ? 'border-[#1d4b99] bg-white' : 'border-slate-300'">
+              <div *ngIf="step() >= 3" class="w-full h-full bg-[#1d4b99] rounded-full scale-50"></div>
+            </div>
+            <span class="text-xs font-medium whitespace-nowrap"
+              [ngClass]="step() >= 3 ? 'text-slate-900 font-semibold' : 'text-slate-400'">Bienvenue</span>
+          </div>
+        </div>
+
+        <!-- Message d'erreur -->
+        <div *ngIf="error()"
+          class="mb-6 p-4 bg-red-50 text-red-600 text-sm rounded-xl border border-red-100 flex items-center gap-2">
+          <lucide-icon name="alert-circle" class="w-4 h-4 shrink-0 text-red-500"></lucide-icon>
+          <span>{{ error() }}</span>
+        </div>
+
+        <form (submit)="handleSubmit($event)" class="flex-1 flex flex-col justify-between">
+          <div class="w-full">
+
+            <!-- ── STEP 2 : INFORMATIONS ACADÉMIQUES ── -->
+            <div *ngIf="step() === 2" [@stepTransition] class="space-y-5">
+              <h2 class="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
+                <lucide-icon name="graduation-cap" class="w-5 h-5 text-[#1d4b99]"></lucide-icon>
+                <span>Informations Académiques &amp; Professionnelles</span>
+              </h2>
+
+              <!-- Grille Université & Département -->
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                <!-- 1. COMBOBOX UNIVERSITÉ -->
+                <div>
+                  <label class="block text-sm font-medium text-slate-700 mb-1.5">
+                    Université
+                  </label>
+                  <div class="relative" data-combo="university">
+                    <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                      <lucide-icon name="building" class="h-5 w-5 text-slate-400"></lucide-icon>
+                    </div>
+                    <input type="text" name="universitySearch" [(ngModel)]="universitySearch"
+                      (focus)="openUniversityDropdown($event)" (click)="openUniversityDropdown($event)"
+                      placeholder="Sélectionner une université..." autocomplete="off"
+                      class="w-full pl-10 pr-10 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1d4b99] focus:border-transparent sm:text-sm bg-white font-medium cursor-pointer" />
+                    <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                      <lucide-icon [name]="showUniversityDropdown() ? 'chevron-down' : 'chevron-down'"
+                        class="h-4 w-4 text-slate-400"></lucide-icon>
+                    </div>
+
+                    <!-- Dropdown Options -->
+                    <div *ngIf="showUniversityDropdown()"
+                      class="absolute z-30 mt-1 w-full bg-white border border-slate-200 rounded-xl shadow-xl max-h-60 overflow-y-auto">
+                      <div *ngFor="let opt of filteredUniversityOptions" (click)="selectUniversity(opt)"
+                        [ngClass]="formData.university === opt ? 'bg-blue-50 text-[#1d4b99] font-bold' : 'text-slate-700 hover:bg-slate-50'"
+                        class="px-4 py-2.5 cursor-pointer text-sm transition-colors flex items-center justify-between">
+                        <span>{{ opt }}</span>
+                        <lucide-icon *ngIf="formData.university === opt" name="check"
+                          class="w-4 h-4 text-[#1d4b99]"></lucide-icon>
+                      </div>
+                      <div *ngIf="filteredUniversityOptions.length === 0"
+                        class="px-4 py-3 text-xs text-slate-400 italic">
+                        Aucun résultat
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 2. COMBOBOX DÉPARTEMENT -->
+                <div>
+                  <label class="block text-sm font-medium text-slate-700 mb-1.5">
+                    Département
+                  </label>
+                  <div class="relative" data-combo="department">
+                    <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                      <lucide-icon name="book-open" class="h-5 w-5 text-slate-400"></lucide-icon>
+                    </div>
+                    <input type="text" name="departmentSearch" [(ngModel)]="departmentSearch"
+                      (focus)="openDepartmentDropdown($event)" (click)="openDepartmentDropdown($event)"
+                      placeholder="Sélectionner un département..." autocomplete="off"
+                      class="w-full pl-10 pr-10 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1d4b99] focus:border-transparent sm:text-sm bg-white font-medium cursor-pointer" />
+                    <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                      <lucide-icon [name]="showDepartmentDropdown() ? 'chevron-down' : 'chevron-down'"
+                        class="h-4 w-4 text-slate-400"></lucide-icon>
+                    </div>
+
+                    <!-- Dropdown Options -->
+                    <div *ngIf="showDepartmentDropdown()"
+                      class="absolute z-30 mt-1 w-full bg-white border border-slate-200 rounded-xl shadow-xl max-h-60 overflow-y-auto">
+                      <div *ngFor="let opt of filteredDepartmentOptions" (click)="selectDepartment(opt)"
+                        [ngClass]="formData.department === opt ? 'bg-blue-50 text-[#1d4b99] font-bold' : 'text-slate-700 hover:bg-slate-50'"
+                        class="px-4 py-2.5 cursor-pointer text-sm transition-colors flex items-center justify-between">
+                        <span class="truncate">{{ opt }}</span>
+                        <lucide-icon *ngIf="formData.department === opt" name="check"
+                          class="w-4 h-4 text-[#1d4b99] shrink-0"></lucide-icon>
+                      </div>
+                      <div *ngIf="filteredDepartmentOptions.length === 0"
+                        class="px-4 py-3 text-xs text-slate-400 italic">
+                        Aucun résultat
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+              <!-- Grille Grade & Téléphone -->
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                <!-- 3. COMBOBOX GRADE -->
+                <div>
+                  <label class="block text-sm font-medium text-slate-700 mb-1.5">
+                    Grade académique
+                  </label>
+                  <div class="relative" data-combo="grade">
+                    <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                      <lucide-icon name="graduation-cap" class="h-5 w-5 text-slate-400"></lucide-icon>
+                    </div>
+                    <input type="text" name="gradeSearch" [(ngModel)]="gradeSearch" (focus)="openGradeDropdown($event)"
+                      (click)="openGradeDropdown($event)" placeholder="Sélectionner un grade..." autocomplete="off"
+                      class="w-full pl-10 pr-10 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1d4b99] focus:border-transparent sm:text-sm bg-white font-medium cursor-pointer" />
+                    <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                      <lucide-icon [name]="showGradeDropdown() ? 'chevron-down' : 'chevron-down'"
+                        class="h-4 w-4 text-slate-400"></lucide-icon>
+                    </div>
+
+                    <!-- Dropdown Options -->
+                    <div *ngIf="showGradeDropdown()"
+                      class="absolute z-30 mt-1 w-full bg-white border border-slate-200 rounded-xl shadow-xl max-h-60 overflow-y-auto">
+                      <div *ngFor="let opt of filteredGradeOptions" (click)="selectGrade(opt)"
+                        [ngClass]="formData.grade === opt ? 'bg-blue-50 text-[#1d4b99] font-bold' : 'text-slate-700 hover:bg-slate-50'"
+                        class="px-4 py-2.5 cursor-pointer text-sm transition-colors flex items-center justify-between">
+                        <span>{{ opt }}</span>
+                        <lucide-icon *ngIf="formData.grade === opt" name="check"
+                          class="w-4 h-4 text-[#1d4b99]"></lucide-icon>
+                      </div>
+                      <div *ngIf="filteredGradeOptions.length === 0" class="px-4 py-3 text-xs text-slate-400 italic">
+                        Aucun résultat
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Numéro de téléphone -->
+                <div>
+                  <label class="block text-sm font-medium text-slate-700 mb-1.5">
+                    Numéro de Téléphone
+                  </label>
+                  <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                      <lucide-icon name="phone" class="h-5 w-5 text-slate-400"></lucide-icon>
+                    </div>
+                    <input type="tel" name="phone" [(ngModel)]="formData.phone" (keypress)="allowNumbersOnly($event)"
+                      (input)="onlyNumbers($event, 'phone')" maxlength="8" inputmode="numeric" pattern="[0-9]*"
+                      placeholder="Ex: 98123456"
+                      class="w-full pl-10 pr-3 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1d4b99] focus:border-transparent sm:text-sm font-medium" />
+                  </div>
+                </div>
+
+              </div>
+
+              <!-- Spécialité -->
+              <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1.5">
+                  Spécialité
+                </label>
+                <div class="relative">
+                  <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                    <lucide-icon name="file-text" class="h-5 w-5 text-slate-400"></lucide-icon>
+                  </div>
+                  <input type="text" name="specialty" [(ngModel)]="formData.specialty"
+                    placeholder="Ex: Intelligence Artificielle, Bases de données, Algorithmique..."
+                    class="w-full pl-10 pr-3 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1d4b99] focus:border-transparent sm:text-sm font-medium" />
+                </div>
+              </div>
+
+            </div>
+
+            <!-- ── STEP 3 : SUCCÈS ── -->
+            <div *ngIf="step() === 3" [@stepTransition] class="text-center py-8">
+              <div
+                class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <lucide-icon name="check-circle" class="w-10 h-10 text-emerald-600"></lucide-icon>
+              </div>
+              <h2 class="text-2xl font-bold text-slate-900 mb-2">Compte Enseignant Créé avec succès !</h2>
+              <p class="text-slate-600 max-w-md mx-auto mb-6 text-sm">
+                Félicitations, votre espace enseignant est prêt. Vous pouvez dès maintenant gérer vos cours,
+                consulter les étudiants et publier des activités académiques.
+              </p>
+            </div>
+
+          </div>
+
+          <!-- Boutons de navigation -->
+          <div class="pt-6 flex items-center w-full" [ngClass]="step() === 3 ? 'justify-center' : 'justify-between'">
+            <button *ngIf="step() === 2" type="button" (click)="handleBack()"
+              class="flex items-center px-5 py-2.5 border border-slate-300 shadow-sm text-sm font-medium rounded-xl text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#1d4b99] transition-colors">
+              <lucide-icon name="chevron-left" class="w-4 h-4 mr-1.5"></lucide-icon>
+              Retour
+            </button>
+
+            <button *ngIf="step() === 2" type="submit" [disabled]="isSubmitting()"
+              class="flex justify-center items-center px-8 py-2.5 border border-transparent shadow-sm text-sm font-medium rounded-xl text-white bg-rose-400 hover:bg-rose-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rose-400 disabled:opacity-75 disabled:cursor-not-allowed transition-colors">
+              <lucide-icon *ngIf="isSubmitting()" name="loader-2" class="w-5 h-5 animate-spin mr-2"></lucide-icon>
+              <span>{{ isSubmitting() ? 'Création en cours...' : 'Terminer' }}</span>
+              <lucide-icon *ngIf="!isSubmitting()" name="chevron-right" class="w-4 h-4 ml-1.5"></lucide-icon>
+            </button>
+
+            <button *ngIf="step() === 3" type="button" (click)="goToDashboard()"
+              class="flex justify-center items-center px-10 py-3 border border-transparent shadow-md text-base font-bold rounded-xl text-white bg-[#1d4b99] hover:bg-[#153c80] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#1d4b99] transition-colors">
+              Accéder à mon espace Enseignant
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Illustration -->
+      <div
+        class="hidden md:flex md:w-1/2 bg-gradient-to-br from-slate-50 to-white border-l border-slate-100 p-6 flex-col items-center justify-center">
+        <div class="w-full flex flex-col items-center animate-fade-in" *ngIf="step() === 2">
+          <img src="assets/images/Profile.png" alt="Profil Enseignant"
+            class="w-full max-w-lg h-auto object-contain mix-blend-multiply animate-float" />
+        </div>
+        <div class="w-full flex flex-col items-center animate-fade-in" *ngIf="step() === 3">
+          <img src="assets/images/Chatbot.png" alt="Bienvenue"
+            class="w-full max-w-sm h-auto object-contain mix-blend-multiply mb-6 animate-float" />
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

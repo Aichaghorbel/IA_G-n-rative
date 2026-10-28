@@ -7,11 +7,12 @@
       <div class="flex items-center gap-2.5 shrink-0">
         <lucide-icon name="graduation-cap" class="w-7 h-7" [style.color]="'#1d4b99'"></lucide-icon>
         <span class="text-xl font-bold text-slate-900 tracking-tight">
-          UniHelp 
+          SmartCampus
         </span>
       </div>
 
       <!-- Center - Nav (desktop) -->
+      <!--
       <nav class="hidden lg:flex items-center space-x-1 h-full">
         <a
           *ngFor="let item of navItems"
@@ -28,6 +29,7 @@
           ></span>
         </a>
       </nav>
+      -->
 
       <!-- Right - Avatar + Mobile menu -->
       <div class="flex items-center space-x-3">
@@ -50,12 +52,14 @@
               <p class="text-sm font-semibold text-slate-900">{{ user()?.name }}</p>
               <p class="text-xs text-slate-500 truncate">{{ user()?.email }}</p>
             </div>
-            <button (click)="navigateTo('/admin/profile')" class="w-full text-left px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 flex items-center space-x-2">
-              <lucide-icon name="user" class="w-4 h-4 text-slate-400"></lucide-icon>
+            <button 
+              class="w-full text-left px-4 py-2.5 text-sm text-slate-400 cursor-not-allowed flex items-center space-x-2">
+              <lucide-icon name="user" class="w-4 h-4 text-slate-300"></lucide-icon>
               <span>Mon profil</span>
             </button>
-            <button (click)="navigateTo('/admin/settings')" class="w-full text-left px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 flex items-center space-x-2">
-              <lucide-icon name="settings" class="w-4 h-4 text-slate-400"></lucide-icon>
+            <button 
+              class="w-full text-left px-4 py-2.5 text-sm text-slate-400 cursor-not-allowed flex items-center space-x-2">
+              <lucide-icon name="settings" class="w-4 h-4 text-slate-300"></lucide-icon>
               <span>Paramètres</span>
             </button>
             <button (click)="handleLogout()" class="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 flex items-center space-x-2">
@@ -68,16 +72,19 @@
         </div>
 
         <!-- Mobile hamburger -->
+        <!--
         <button
           class="lg:hidden text-slate-500 hover:text-slate-700"
           (click)="toggleMobileMenu()"
         >
           <lucide-icon [name]="isMobileMenuOpen() ? 'x' : 'menu'" class="w-6 h-6"></lucide-icon>
         </button>
+        -->
       </div>
     </div>
 
     <!-- Mobile nav dropdown -->
+    <!--
     <div *ngIf="isMobileMenuOpen()" class="lg:hidden bg-white border-b border-slate-200 shadow-lg">
       <nav class="px-4 py-3 space-y-1">
         <a
@@ -92,6 +99,7 @@
         </a>
       </nav>
     </div>
+    -->
   </header>
 
   <!-- Main Content -->

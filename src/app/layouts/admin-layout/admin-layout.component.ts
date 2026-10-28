@@ -24,10 +24,7 @@ export class AdminLayoutComponent {
   isProfileOpen = signal<boolean>(false);
 
   navItems = [
-    { path: '/admin/dashboard', label: 'Tableau de bord', icon: 'layout-dashboard' },
-    { path: '/admin/documents', label: 'Documents', icon: 'file-text' },
-    { path: '/admin/students', label: 'Étudiants', icon: 'users' },
-    { path: '/admin/management', label: 'Admins', icon: 'shield' }
+    { path: '/admin/dashboard', label: 'Tableau de bord', icon: 'layout-dashboard' }
   ];
 
   initials() {

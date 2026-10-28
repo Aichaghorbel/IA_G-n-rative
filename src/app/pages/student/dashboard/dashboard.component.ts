@@ -1,8 +1,9 @@
-import { Component, signal, inject, AfterViewInit, OnDestroy } from '@angular/core';
+import { Component, signal, inject, AfterViewInit, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { AuthService } from '../../../../app/services/auth.service';
+import { DashboardService } from '../../../../app/services/dashboard.service';
 import { Chart, registerables } from 'chart.js';
 
 Chart.register(...registerables);
@@ -13,8 +14,9 @@ Chart.register(...registerables);
   imports: [CommonModule, RouterModule, LucideAngularModule],
   templateUrl: './dashboard.component.html'
 })
-export class DashboardComponent implements AfterViewInit, OnDestroy {
+export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   private authService = inject(AuthService);
+  private dashboardService = inject(DashboardService);
   private router = inject(Router);
 
   user = this.authService.user;
@@ -73,6 +75,30 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
   progressionTab = signal<'bar' | 'pie'>('pie');
   private progChart: Chart | null = null;
   private PROGRESSION_COLORS = ['#1d4b99', '#8db2edff', '#bdd9f4ff'];
+
+  ngOnInit() {
+    this.dashboardService.getStudentDashboard().subscribe(data => {
+      if (data) {
+        if (data.weeklyData) {
+          this.weeklyData = data.weeklyData.map((w: any) => ({ day: w.name, messages: w.messages, activite: w.activite }));
+        }
+        if (data.monthlyData) {
+          this.monthlyData = data.monthlyData.map((m: any) => ({ day: m.name, messages: m.messages, activite: m.activite }));
+        }
+        if (data.progressionData) {
+          this.progressionData = data.progressionData;
+        }
+        if (data.recentActivity && data.recentActivity.length > 0) {
+          this.recentActivity = data.recentActivity;
+        }
+        if (data.favoriteMessages && data.favoriteMessages.length > 0) {
+          this.favoriteMessages = data.favoriteMessages;
+        }
+        this.renderChart();
+        this.renderProgressionChart();
+      }
+    });
+  }
 
   ngAfterViewInit() {
     this.renderChart();

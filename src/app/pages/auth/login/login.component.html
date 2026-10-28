@@ -2,10 +2,10 @@
   <div class="mb-8 flex flex-col items-center justify-start">
     <app-uni-help-logo size="lg" [showText]="false" color="#1d4b99"></app-uni-help-logo>
     <span class="mt-6 text-3xl font-bold text-slate-900 tracking-tight">
-      UniHelp
+      SmartCampus
     </span>
     <p class="mt-2 text-slate-600 text-center">
-      Votre assistant intelligent qui simplifie, automatise et optimise les services universitaires
+     Votre assistant intelligent pour l’orientation universitaire
     </p>
   </div>
 
@@ -65,12 +65,18 @@
     </button>
   </form>
 
-  <div class="mt-8 text-center">
+  <div class="mt-8 text-center space-y-2">
     <p class="text-sm text-slate-600">
       Pas encore de compte ?
-      <a routerLink="/register" class="font-semibold text-[#1d4b99] hover:text-[#153c80] transition-colors">
-        Créer un compte
-      </a>
     </p>
+    <div class="flex items-center justify-center gap-4 text-sm font-semibold">
+      <a routerLink="/register" class="text-[#1d4b99] hover:underline flex items-center gap-1">
+        <span> Inscription Étudiant</span>
+      </a>
+      <span class="text-slate-300">|</span>
+      <a routerLink="/register-enseignant" class="text-[#1d4b99] hover:underline flex items-center gap-1">
+        <span> Inscription Enseignant</span>
+      </a>
+    </div>
   </div>
 </div>
