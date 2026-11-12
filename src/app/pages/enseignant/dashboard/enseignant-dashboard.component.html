@@ -1,27 +1,136 @@
-<div class="space-y-6">
+<div class="space-y-8 max-w-7xl mx-auto pb-12 font-sans">
+  
   <!-- Welcome Banner -->
-  <div
-    class="relative rounded-2xl overflow-hidden shadow-lg bg-gradient-to-r from-[#1d4b99] to-[#00afb9] p-6 md:p-8 text-white">
-    <div class="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-      <div>
-        <div
-          class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 text-xs font-medium mb-3 backdrop-blur-sm">
-          <lucide-icon name="sparkles" class="w-3.5 h-3.5"></lucide-icon>
-          <span>Espace Enseignant</span>
+  <div class="relative rounded-2xl overflow-hidden shadow-lg backdrop-blur-md"
+    [style.background]="'linear-gradient(135deg, rgba(0,175,185,0.5), rgba(0,175,185,0.9))'">
+    <div class="min-h-[12rem] md:h-48 bg-slate-800 relative">
+      <div class="absolute inset-0 opacity-30 bg-cover bg-center"
+        style="background-image: url('assets/images/couverture.webp')"></div>
+
+      <div class="relative z-10 h-full flex flex-col md:flex-row items-start md:items-center justify-between p-6 md:p-8 gap-4">
+        <div class="text-white">
+          <h1 class="text-3xl md:text-4xl font-bold mb-2">
+            Bienvenue, {{ user()?.name || 'Prof. Enseignant' }}
+          </h1>
+          <p class="text-white/80 text-sm md:text-base max-w-2xl leading-relaxed">
+            Suivez les profils des candidats, analysez les résultats de leurs QCM, planifiez et menez vos entretiens d'orientation, et confirmez les décisions d'orientation.
+          </p>
         </div>
-        <h1 class="text-2xl md:text-3xl font-bold mb-2">
-          Bienvenue, {{ user()?.name || 'Enseignant' }}
-        </h1>
-        <!-- <p class="text-white/80 text-sm md:text-base max-w-xl">
-          Consultez vos cours actuels, gérez vos étudiants et accédez à vos outils pédagogiques.
-        </p> -->
-      </div>
-      <div class="flex items-center gap-3">
-        <!-- <button
-          class="flex items-center gap-2 bg-white text-[#1d4b99] px-4 py-2.5 rounded-xl text-sm font-semibold hover:bg-slate-50 transition-all shadow-sm">
-          <lucide-icon name="plus" class="w-4 h-4"></lucide-icon>
-          <span>Nouveau cours</span>
-        </button> -->
+
+        <div class="flex items-center gap-3 shrink-0">
+          <a routerLink="/enseignant/entretiens"
+            class="flex items-center gap-2 bg-white/90 text-slate-800 px-5 py-2.5 rounded-xl text-xs md:text-sm font-semibold hover:bg-white hover:scale-105 transition-all duration-300 shadow-md">
+            <lucide-icon name="calendar" class="w-4 h-4 text-[#1d4b99]"></lucide-icon>
+            <span>Gérer les Entretiens</span>
+          </a>
+          <a routerLink="/enseignant/students"
+            class="flex items-center gap-2 bg-amber-400 hover:bg-amber-300 text-slate-900 px-5 py-2.5 rounded-xl text-xs md:text-sm font-bold hover:scale-105 transition-all duration-300 shadow-md">
+            <lucide-icon name="users" class="w-4 h-4"></lucide-icon>
+            <span>Profils Candidats</span>
+          </a>
+        </div>
       </div>
     </div>
   </div>
+
+  <!-- Stats Grid -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+    <div *ngFor="let s of stats()" class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-start justify-between">
+      <div>
+        <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">{{ s.label }}</span>
+        <h3 class="text-2xl font-black text-slate-900 mt-1">{{ s.value }}</h3>
+      </div>
+      <div [class]="s.bg + ' ' + s.color" class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0">
+        <lucide-icon [name]="s.icon" class="w-5 h-5"></lucide-icon>
+      </div>
+    </div>
+  </div> 
+
+  <!-- Content Grid -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch"> 
+  
+    <!-- Prochains Entretiens -->
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 flex flex-col">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
+        <div class="flex items-center gap-2.5 text-slate-900 font-bold">
+          <div class="w-8 h-8 rounded-lg bg-blue-50 text-[#1d4b99] flex items-center justify-center shrink-0">
+            <lucide-icon name="calendar" class="w-4 h-4"></lucide-icon>
+          </div>
+          <h3 class="text-base font-bold">Prochains entretiens</h3>
+        </div>
+        <a routerLink="/enseignant/entretiens" [queryParams]="{ statut: 'Planifié' }" class="text-xs text-[#1d4b99] font-bold hover:underline whitespace-nowrap">
+          Voir tout &rarr;
+        </a>
+      </div>
+
+      <div *ngIf="prochainsEntretiens().length > 0" class="space-y-3 flex-1">
+        <div *ngFor="let ent of prochainsEntretiens()"
+          class="p-3.5 rounded-xl border border-slate-200/80 bg-slate-50/40 hover:bg-white hover:border-slate-300 hover:shadow-sm transition-all flex items-center justify-between gap-3">
+          <div class="flex items-center gap-3 min-w-0">
+            <div class="w-9 h-9 rounded-full bg-white border border-slate-200 flex items-center justify-center text-[#1d4b99] font-bold text-xs shrink-0 shadow-xs">
+              {{ ent.candidatNom.substring(0, 2).toUpperCase() }}
+            </div>
+            <div class="min-w-0">
+              <div class="font-bold text-slate-900 text-sm truncate">{{ ent.candidatNom }}</div>
+              <div class="text-xs text-slate-500 mt-0.5 truncate">
+                {{ ent.salleOuLien }}
+              </div>
+            </div>
+          </div>
+          <div class="shrink-0 text-right">
+            <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-blue-50 text-[#1d4b99] border border-blue-100 whitespace-nowrap">
+              {{ ent.date }} à {{ ent.heure }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="prochainsEntretiens().length === 0" class="flex-1 flex items-center justify-center text-center py-10 text-slate-400 text-xs">
+        Aucun entretien planifié pour le moment.
+      </div>
+    </div> 
+
+    <!-- Candidats en attente de validation -->
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 flex flex-col">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
+        <div class="flex items-center gap-2.5 text-slate-900 font-bold">
+          <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+            <lucide-icon name="users" class="w-4 h-4"></lucide-icon>
+          </div>
+          <h3 class="text-base font-bold">Candidats en Attente d'Orientation</h3>
+        </div>
+        <a routerLink="/enseignant/students" [queryParams]="{ statut: 'En attente entretien' }" class="text-xs text-[#1d4b99] font-bold hover:underline whitespace-nowrap">
+          Consulter les profils &rarr;
+        </a>
+      </div>
+
+      <div *ngIf="candidatsAValider().length > 0" class="space-y-3 flex-1">
+        <div *ngFor="let cand of candidatsAValider()"
+          class="p-3.5 rounded-xl border border-slate-200/80 bg-slate-50/40 hover:bg-white hover:border-slate-300 hover:shadow-sm transition-all flex items-center justify-between gap-3">
+          <div class="flex items-center gap-3 min-w-0">
+            <div class="w-9 h-9 rounded-full bg-white border border-slate-200 flex items-center justify-center text-[#1d4b99] font-bold text-xs shrink-0 shadow-xs">
+              {{ cand.nom.substring(0, 2).toUpperCase() }}
+            </div>
+            <div class="min-w-0">
+              <div class="font-bold text-slate-900 text-sm truncate">{{ cand.nom }}</div>
+              <div class="text-xs text-slate-500 mt-0.5 truncate">
+                {{ cand.filiereSouhaitee }} ({{ cand.universiteSouhaitee }})
+              </div>
+            </div>
+          </div>
+          <div class="shrink-0">
+            <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-[11px] font-bold bg-blue-50 text-[#1d4b99] border border-blue-100 whitespace-nowrap">
+              Score QCM : {{ cand.qcmPasse ? (cand.scoreQcm + '%') : 'Non passé' }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="candidatsAValider().length === 0" class="flex-1 flex items-center justify-center text-center py-10 text-slate-400 text-xs">
+        Tous les candidats ont été orientés avec succès.
+      </div>
+    </div>
+
+  </div>
+
+</div> 

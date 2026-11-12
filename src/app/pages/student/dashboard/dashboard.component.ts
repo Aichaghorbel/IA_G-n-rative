@@ -4,6 +4,7 @@ import { Router, RouterModule } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { AuthService } from '../../../../app/services/auth.service';
 import { DashboardService } from '../../../../app/services/dashboard.service';
+import { OrientationService, Entretien, CandidatOrientation, NotificationCandidat } from '../../../../app/services/orientation.service';
 import { Chart, registerables } from 'chart.js';
 
 Chart.register(...registerables);
@@ -17,9 +18,39 @@ Chart.register(...registerables);
 export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   private authService = inject(AuthService);
   private dashboardService = inject(DashboardService);
+  private orientationService = inject(OrientationService);
   private router = inject(Router);
 
   user = this.authService.user;
+  candidats = this.orientationService.candidats;
+  entretiens = this.orientationService.entretiens;
+  notifications = this.orientationService.notifications;
+  dernierQCM = this.orientationService.dernierResultatQCM;
+
+  // Récupère les données du candidat connecté
+  monCandidat = (): CandidatOrientation | null => {
+    const u = this.user();
+    if (!u) return null;
+    return this.candidats().find(c => c.email.toLowerCase() === u.email.toLowerCase()) || this.candidats()[0] || null;
+  };
+
+  // Récupère le prochain entretien du candidat
+  monRendezVous = (): Entretien | null => {
+    const cand = this.monCandidat();
+    if (!cand) return this.entretiens()[0] || null;
+    return this.entretiens().find(e => e.candidatEmail.toLowerCase() === cand.email.toLowerCase()) || this.entretiens()[0] || null;
+  };
+
+  handleNotifClick(notif: NotificationCandidat) {
+    const titreLower = notif.titre.toLowerCase();
+    const msgLower = notif.message.toLowerCase();
+
+    if (notif.type === 'rdv' || titreLower.includes('entretien') || msgLower.includes('entretien') || msgLower.includes('rendez-vous')) {
+      this.orientationService.ouvrirModalEntretien();
+    } else if (notif.type === 'qcm' || titreLower.includes('qcm')) {
+      this.router.navigate(['/student/qcm']);
+    }
+  }
   chartTab = signal<'semaine' | 'mois'>('semaine');
   private chart: Chart | null = null;
   

@@ -12,7 +12,7 @@
       </div>
 
       <!-- Center - Nav (desktop) -->
-      <!--
+      <!-- Center - Nav (desktop) -->
       <nav class="hidden md:flex items-center space-x-1 h-full">
         <a
           *ngFor="let item of navItems"
@@ -22,6 +22,7 @@
           class="relative px-4 flex items-center h-full text-sm font-medium transition-colors text-slate-500 hover:text-slate-900"
           [ngClass]="{'text-[#1d4b99]': rla.isActive}"
         >
+          <lucide-icon *ngIf="item.icon" [name]="item.icon" class="w-4 h-4 mr-1.5"></lucide-icon>
           {{ item.label }}
           <span
             *ngIf="rla.isActive"
@@ -29,10 +30,48 @@
           ></span>
         </a>
       </nav>
-      -->
 
-      <!-- Right - Avatar + Mobile menu -->
+      <!-- Right - Notifications + Avatar -->
       <div class="flex items-center space-x-3">
+        
+        <!-- Notifications Bell -->
+        <div class="relative flex items-center">
+          <button (click)="toggleNotifs()" title="Notifications"
+            class="relative w-9 h-9 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 flex items-center justify-center text-slate-600 transition-colors">
+            <lucide-icon name="bell" class="w-4 h-4"></lucide-icon>
+            <span *ngIf="unreadCount() > 0" class="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center">
+              {{ unreadCount() }}
+            </span>
+          </button>
+
+          <!-- Notifications Dropdown -->
+          <div *ngIf="isNotifsOpen()" class="absolute right-0 top-full mt-2 w-80 bg-white rounded-2xl shadow-xl border border-slate-200 py-3 z-50">
+            <div class="px-4 pb-2 border-b border-slate-100 flex items-center justify-between">
+              <span class="text-xs font-bold text-slate-800 uppercase tracking-wider">Notifications</span>
+              <span class="text-[11px] text-[#1d4b99] font-medium">{{ notifications().length }} messages</span>
+            </div>
+            <div class="max-h-72 overflow-y-auto divide-y divide-slate-100">
+              <div *ngFor="let n of notifications()" 
+                   (click)="handleNotifClick(n)" 
+                   class="p-3 text-xs hover:bg-blue-50/60 transition-colors cursor-pointer group">
+                <div class="font-bold text-slate-900 mb-0.5 flex justify-between items-center">
+                  <span class="group-hover:text-[#1d4b99] transition-colors flex items-center gap-1.5">
+                    <span *ngIf="n.type === 'rdv'" class="w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0"></span>
+                    <span>{{ n.titre }}</span>
+                  </span>
+                  <span class="text-[10px] text-slate-400 font-normal shrink-0">{{ n.date }}</span>
+                </div>
+                <p class="text-slate-600 text-[11px] leading-relaxed">{{ n.message }}</p>
+                <div *ngIf="n.type === 'rdv'" class="mt-1.5 flex items-center gap-1 text-[10px] font-bold text-[#1d4b99]">
+                  <lucide-icon name="calendar" class="w-3 h-3"></lucide-icon>
+                  <span>Cliquer pour voir les détails de l'entretien &rarr;</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div *ngIf="isNotifsOpen()" (click)="toggleNotifs()" class="fixed inset-0 z-40 bg-transparent"></div>
+        </div>
+
         <!-- Profile dropdown -->
         <div class="relative flex items-center">
           <span class="hidden md:block text-sm font-medium text-slate-700 mr-3">
@@ -52,8 +91,9 @@
               <p class="text-xs text-slate-500 truncate">{{ user()?.email }}</p>
             </div>
             <button
-              class="w-full text-left px-4 py-2.5 text-sm text-slate-400 cursor-not-allowed flex items-center space-x-2">
-              <lucide-icon name="user" class="w-4 h-4 text-slate-300"></lucide-icon>
+              (click)="navigateTo('/student/profile')"
+              class="w-full text-left px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 flex items-center space-x-2">
+              <lucide-icon name="user" class="w-4 h-4 text-slate-500"></lucide-icon>
               <span>Mon profil</span>
             </button>
             <button
@@ -94,7 +134,7 @@
           (click)="toggleMobileMenu()"
           class="flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-slate-600 hover:bg-slate-50"
         >
-          <lucide-icon [name]="item.icon" class="w-5 h-5"></lucide-icon>
+          <lucide-icon *ngIf="item.icon" [name]="item.icon" class="w-5 h-5"></lucide-icon>
           <span>{{ item.label }}</span>
         </a>
       </nav>
@@ -104,11 +144,107 @@
 
   <!-- Main Content -->
   <main class="flex-1 overflow-auto">
-    <div class="max-w-7xl mx-auto p-4 md:p-6 lg:p-8">
+    <div [class]="isFullWidth() ? 'w-full min-h-full p-0' : 'max-w-7xl mx-auto p-4 md:p-6 lg:p-8'">
       <router-outlet></router-outlet>
     </div>
   </main>
 
-  <!-- Floating Chatbot Button -->
-  <!-- <app-chatbot-fab></app-chatbot-fab> -->
+  <!-- Floating Chatbot FAB (caché sur la page /student/chatbot, visible partout ailleurs) -->
+  <app-chatbot-fab></app-chatbot-fab>
+
+  <!-- Modal Détails Rendez-vous d'Entretien (ouvert au clic sur la notification) -->
+  <div *ngIf="selectedEntretienModal()" 
+       class="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
+    <div class="bg-white rounded-2xl max-w-xl w-full p-6 md:p-8 shadow-2xl relative border border-slate-100 animate-in zoom-in-95 duration-200">
+      
+      <!-- Bouton Fermer (X) -->
+      <button (click)="fermerModalEntretien()" 
+              class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-700 flex items-center justify-center transition-colors">
+        <lucide-icon name="x" class="w-4 h-4"></lucide-icon>
+      </button>
+
+      <!-- En-tête : Titre + Statut -->
+      <div class="flex items-center justify-between pb-4 border-b border-slate-100 pr-8">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-blue-50 text-[#1d4b99] flex items-center justify-center">
+            <lucide-icon name="calendar" class="w-5 h-5"></lucide-icon>
+          </div>
+          <div>
+            <h3 class="text-base md:text-lg font-bold text-slate-900">
+              Consulter son Rendez-vous d'Entretien
+            </h3>
+            <p class="text-xs text-slate-500">Candidat : {{ selectedEntretienModal()?.candidatNom }}</p>
+          </div>
+        </div>
+
+        <span 
+          [class]="selectedEntretienModal()?.statut === 'Terminé' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-blue-50 text-[#1d4b99] border-blue-200'"
+          class="px-3 py-1 rounded-full text-xs font-bold border">
+          {{ selectedEntretienModal()?.statut }}
+        </span>
+      </div>
+
+      <!-- Informations détaillées (conforme à l'image 1) -->
+      <div class="mt-5 space-y-4">
+        
+        <!-- Grille : Date & Heure + Enseignant référent -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="p-4 bg-slate-50 rounded-xl border border-slate-100">
+            <span class="text-xs text-slate-400 font-medium">Date & Heure :</span>
+            <div class="text-sm font-bold text-slate-800 mt-1 flex items-center gap-2">
+              <lucide-icon name="clock" class="w-4 h-4 text-slate-500"></lucide-icon>
+              <span>{{ selectedEntretienModal()?.date }} à {{ selectedEntretienModal()?.heure }}</span>
+            </div>
+          </div>
+
+          <div class="p-4 bg-slate-50 rounded-xl border border-slate-100">
+            <span class="text-xs text-slate-400 font-medium">Enseignant référent :</span>
+            <div class="text-sm font-bold text-slate-800 mt-1 flex items-center gap-2">
+              <lucide-icon name="user" class="w-4 h-4 text-slate-500"></lucide-icon>
+              <span>{{ selectedEntretienModal()?.enseignantNom }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Lieu de l'entretien / Lien Visio -->
+        <div class="p-4 bg-blue-50/60 rounded-xl border border-blue-100">
+          <span class="text-xs text-slate-500 font-medium">Lieu de l'entretien / Lien Visio :</span>
+          <div class="text-sm font-semibold text-[#1d4b99] mt-1 flex items-center gap-2">
+            <lucide-icon name="map-pin" class="w-4 h-4 text-[#1d4b99] shrink-0"></lucide-icon>
+            <span>{{ selectedEntretienModal()?.salleOuLien }}</span>
+          </div>
+        </div>
+
+        <!-- Appréciation de l'enseignant -->
+        <div *ngIf="selectedEntretienModal()?.notesEntretien" class="p-4 bg-emerald-50/70 rounded-xl border border-emerald-100">
+          <span class="text-xs text-emerald-800 font-bold block mb-1">Appréciation de l'enseignant :</span>
+          <p class="text-xs text-emerald-900 leading-relaxed italic">
+            "{{ selectedEntretienModal()?.notesEntretien }}"
+          </p>
+        </div>
+
+        <!-- Avis & Orientation finale -->
+        <div *ngIf="selectedEntretienModal()?.orientationFinale" class="p-3.5 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between text-xs">
+          <div>
+            <span class="text-slate-400 font-medium">Avis enseignant : </span>
+            <span class="font-bold text-emerald-700">{{ selectedEntretienModal()?.avisEnseignant || 'Favorable' }}</span>
+          </div>
+          <div class="text-right">
+            <span class="text-slate-400 font-medium">Orientation retenue : </span>
+            <span class="font-bold text-[#1d4b99]">{{ selectedEntretienModal()?.orientationFinale }}</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Bouton d'action bas -->
+      <div class="flex justify-end gap-3 mt-6 pt-4 border-t border-slate-100">
+        <button (click)="fermerModalEntretien()" 
+                class="px-5 py-2.5 rounded-xl text-xs font-bold bg-[#1d4b99] text-white hover:bg-[#153c80] shadow-sm transition-all">
+          Fermer
+        </button>
+      </div>
+
+    </div>
+  </div>
 </div>

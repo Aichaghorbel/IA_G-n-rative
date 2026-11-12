@@ -67,9 +67,18 @@
         </div>
       </div>
 
+      <!-- Ancien bouton "Suivant" mis en commentaire :
       <button (click)="handleNext()"
         class="mt-6 w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-lg text-sm font-semibold text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#1d4b99] transition-all duration-200 bg-[#1d4b99] hover:bg-[#153c80] hover:shadow-xl transform hover:-translate-y-0.5">
         Suivant
+      </button>
+      -->
+
+      <!-- Enregistrer directement -->
+      <button (click)="handleSubmit($event)" [disabled]="isSubmitting()"
+        class="mt-6 w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-xl shadow-lg text-sm font-semibold text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#1d4b99] transition-all duration-200 bg-[#1d4b99] hover:bg-[#153c80] hover:shadow-xl transform hover:-translate-y-0.5 disabled:opacity-75">
+        <lucide-icon *ngIf="isSubmitting()" name="loader-2" class="w-5 h-5 animate-spin mr-2"></lucide-icon>
+        <span>S'enregistrer</span>
       </button>
 
       <div class="mt-8 text-center text-sm text-slate-600 space-y-2">
@@ -90,6 +99,13 @@
   </app-auth-layout>
 </ng-container>
 
+<!-- =========================================================================
+     [MIS EN COMMENTAIRE / DÉSACTIVÉ]
+     Étapes suivantes d'inscription (Steps 2 à 5) :
+     L'inscription est désormais directe en 1 seule étape avec le bouton "S'enregistrer".
+     Pour réactiver ces étapes ultérieures, retirer le ngIf="false".
+========================================================================= -->
+<ng-container *ngIf="false">
 <!-- Steps 2-6: Custom full-page layout -->
 <div *ngIf="step() > 1"
   class="min-h-screen bg-gradient-to-br from-[#1d4b99] to-teal-700 flex flex-col font-sans animate-swipe-in">
@@ -586,3 +602,4 @@
     </div>
   </div>
 </div>
+</ng-container>

@@ -1,4 +1,4 @@
-import { Component, signal, inject } from '@angular/core';
+import { Component, signal, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule, RouterLinkActive, RouterLink } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
@@ -20,17 +20,19 @@ export class EnseignantLayoutComponent {
   private router = inject(Router);
 
   user = this.authService.user;
+  teacherUni = computed<'IIT' | 'ISB'>(() => this.user()?.university === 'ISB' ? 'ISB' : 'IIT');
   isMobileMenuOpen = signal<boolean>(false);
   isProfileOpen = signal<boolean>(false);
 
   navItems = [
-    { path: '/enseignant/dashboard', label: 'Tableau de bord', icon: 'layout-dashboard' },
-    { path: '/enseignant/courses', label: 'Mes Cours', icon: 'book-open' },
-    { path: '/enseignant/students', label: 'Étudiants', icon: 'users' },
-    { path: '/enseignant/grades', label: 'Notes & Examens', icon: 'file-text' }
+    { path: '/enseignant/dashboard', label: 'Tableau de bord' }, { path: '/enseignant/entretiens', label: 'Entretiens' },
+    { path: '/enseignant/results', label: 'Résultats QCM' },
+
+    { path: '/enseignant/students', label: 'Profils Candidats' },
+
   ];
 
-  constructor() {}
+  constructor() { }
 
   initials() {
     const u = this.user();

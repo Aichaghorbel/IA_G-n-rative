@@ -41,6 +41,30 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/student/dashboard/dashboard.component').then(m => m.DashboardComponent)
       },
       {
+        path: 'parcours',
+        loadComponent: () => import('./pages/student/parcours/parcours.component').then(m => m.ParcoursComponent)
+      },
+      {
+        path: 'preinscription',
+        loadComponent: () => import('./pages/student/preinscription/preinscription.component').then(m => m.PreinscriptionComponent)
+      },
+      {
+        path: 'qcm',
+        loadComponent: () => import('./pages/student/qcm/qcm.component').then(m => m.QcmComponent)
+      },
+      {
+        path: 'chatbot',
+        loadComponent: () => import('./pages/student/chatbot/chatbot.component').then(m => m.ChatbotComponent)
+      },
+      {
+        path: 'profile',
+        loadComponent: () => import('./pages/student/profile/profile.component').then(m => m.ProfileComponent)
+      },
+      {
+        path: 'settings',
+        loadComponent: () => import('./pages/student/settings/settings.component').then(m => m.SettingsComponent)
+      },
+      {
         path: '',
         pathMatch: 'full',
         redirectTo: 'dashboard'
@@ -73,7 +97,27 @@ export const routes: Routes = [
       {
         path: 'dashboard',
         loadComponent: () => import('./pages/enseignant/dashboard/enseignant-dashboard.component').then(m => m.EnseignantDashboardComponent)
+      }, {
+        path: 'entretiens',
+        loadComponent: () => import('./pages/enseignant/entretiens/entretiens.component').then(m => m.EntretiensComponent)
       },
+      {
+        path: 'students',
+        loadComponent: () => import('./pages/enseignant/students/students-list.component').then(m => m.StudentsListComponent)
+      },
+      {
+        path: 'results',
+        loadComponent: () => import('./pages/enseignant/results/results.component').then(m => m.ResultsComponent)
+      },
+      {
+        path: 'profile',
+        loadComponent: () => import('./pages/enseignant/profile/profile.component').then(m => m.EnseignantProfileComponent)
+      },
+      {
+        path: 'settings',
+        loadComponent: () => import('./pages/enseignant/settings/settings.component').then(m => m.SettingsComponent)
+      },
+
       {
         path: '',
         pathMatch: 'full',

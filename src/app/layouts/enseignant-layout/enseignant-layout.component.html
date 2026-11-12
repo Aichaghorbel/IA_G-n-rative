@@ -10,29 +10,28 @@
           SmartCampus
         </span>
         <span class="ml-2 px-2.5 py-0.5 text-xs font-semibold rounded-full bg-blue-50 text-[#1d4b99] border border-blue-200">
-          Enseignant
+          Enseignant  {{ teacherUni() }}
         </span>
+       
       </div>
 
       <!-- Center - Nav (desktop) -->
-      <!--
       <nav class="hidden lg:flex items-center space-x-1 h-full">
         <a
           *ngFor="let item of navItems"
           [routerLink]="item.path"
           routerLinkActive="active-link"
           #rla="routerLinkActive"
-          class="relative px-3 flex items-center h-full text-sm font-medium transition-colors text-slate-500 hover:text-slate-900"
+          class="relative px-3.5 flex items-center gap-2 h-full text-xs md:text-sm font-medium transition-colors text-slate-500 hover:text-slate-900"
           [ngClass]="{'text-[#1d4b99]': rla.isActive}"
         >
-          {{ item.label }}
+          <span>{{ item.label }}</span>
           <span
             *ngIf="rla.isActive"
             class="absolute bottom-0 left-2 right-2 h-0.5 rounded-full bg-[#1d4b99]"
           ></span>
         </a>
       </nav>
-      -->
 
       <!-- Right - Avatar + Mobile menu -->
       <div class="flex items-center space-x-3">

@@ -12,7 +12,8 @@ import {
   Edit2, Trash, ChevronDown, UploadCloud, Eye, Building, Clock, 
   Sun, Moon, Globe, Info, Palette, Camera, ChevronLeft, Send, Sparkles, Copy, RefreshCw, Paperclip,
   Contact, MapPin, Calendar, BookOpen, Phone, Layers, Megaphone, Star, Radio,
-  MoreVertical, MoreHorizontal, Volume2, File, Coins, EyeOff, Folder
+  MoreVertical, MoreHorizontal, Volume2, File, Coins, EyeOff, Folder, Mic, Square,
+  ClipboardCheck, ArrowLeft, ArrowRight, UserCheck, Video
 } from 'lucide-angular';
 
 import { routes } from './app.routes';
@@ -31,7 +32,8 @@ export const appConfig: ApplicationConfig = {
       Edit2, Trash, ChevronDown, UploadCloud, Eye, Building, Clock, 
       Sun, Moon, Globe, Info, Palette, Camera, ChevronLeft, Send, Sparkles, Copy, RefreshCw, Paperclip,
       Contact, MapPin, Calendar, BookOpen, Phone, Layers, Megaphone, Star, Radio,
-      MoreVertical, MoreHorizontal, Volume2, File, Coins, EyeOff, Folder
+      MoreVertical, MoreHorizontal, Volume2, File, Coins, EyeOff, Folder, Mic, Square,
+      ClipboardCheck, ArrowLeft, ArrowRight, UserCheck, Video
     }))
   ]
 };

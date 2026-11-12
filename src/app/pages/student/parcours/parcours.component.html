@@ -1,0 +1,316 @@
+<div class="space-y-8 max-w-7xl mx-auto pb-12 font-sans">
+
+  <!-- Search & Filter Controls -->
+  <div
+    class="bg-white p-4 md:p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row items-center justify-center gap-4 relative">
+
+    <!-- University Pill Filter (centré) -->
+    <div class="flex items-center justify-center gap-3 flex-wrap">
+      <button (click)="selectedUni.set('IIT')"
+        [class]="selectedUni() === 'IIT' ? 'bg-[#1d4b99] text-white shadow-md scale-105' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'"
+        class="px-6 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2">
+        <span>IIT</span>
+      </button>
+      <button (click)="selectedUni.set('ISB')"
+        [class]="selectedUni() === 'ISB' ? 'bg-[#1d4b99] text-white shadow-md scale-105' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'"
+        class="px-6 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2"> <span>ISB</span>
+      </button>
+    </div>
+
+    <!-- Search input -->
+    <div class="relative w-full md:w-64 md:absolute md:right-5">
+      <lucide-icon name="search"
+        class="w-4 h-4 absolute left-1.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></lucide-icon>
+      <input type="text" placeholder="Rechercher" [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event)"
+        class="w-full pl-8 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#1d4b99]/30 focus:border-[#1d4b99] transition-all" />
+    </div>
+  </div>
+
+  <!-- Horizontal Scroll with arrows as FLEX siblings (outside card area) -->
+  <!-- negative mx to escape layout padding and push arrows to edges -->
+  <div class="flex items-center gap-2" style="margin-left: -2rem; margin-right: -4rem;">
+
+    <!-- Bouton Flèche GAUCHE -->
+    <button (mouseenter)="startContinuousScroll('left')" (mouseleave)="stopContinuousScroll()"
+      (touchstart)="startContinuousScroll('left')" (touchend)="stopContinuousScroll()" (click)="scrollLeft()"
+      aria-label="Défiler vers la gauche" class="parcours-side-arrow flex-shrink-0">
+      <lucide-icon name="chevron-left" class="w-6 h-6"></lucide-icon>
+    </button>
+
+    <!-- Grille de cartes -->
+    <div #parcoursScrollContainer
+      class="parcours-grid flex overflow-x-auto scrollbar-hide snap-x snap-mandatory flex-1 pl-2 pr-6">
+
+      <!-- Flip Card Item -->
+      <div *ngFor="let parcours of filteredParcours(); let idx = index" class="flip-card">
+        <ng-container *ngIf="getParcoursVisual(parcours, idx) as visual">
+          <div class="flip-card-inner">
+
+            <!-- FRONT FACE -->
+            <div class="flip-card-front relative flex flex-col justify-between p-6 h-full overflow-hidden text-white">
+              <img [src]="visual.bgImage" [alt]="parcours.nom"
+                loading="eager"
+                decoding="async"
+                class="absolute inset-0 w-full h-full object-cover z-0" />
+              <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/50 to-black/25 z-0"></div>
+
+              <!-- Top Section -->
+              <div class="relative z-10 flex justify-between items-center w-full">
+                <span class="px-2.5 py-1 bg-black/45 backdrop-blur-md rounded-full text-xs font-semibold border"
+                  [class]="visual.badgeColor">
+                  0{{ idx + 1 }}
+                </span>
+                <div class="flex space-x-1.5">
+                  <span class="px-2.5 py-1 bg-black/45 backdrop-blur-md rounded-full text-xs font-semibold border"
+                    [class]="visual.tag1Color">
+                    {{ parcours.universite }}
+                  </span>
+                  <span class="px-2.5 py-1 bg-black/45 backdrop-blur-md rounded-full text-xs font-semibold border"
+                    [class]="visual.tag2Color">
+                    {{ parcours.type }}
+                  </span>
+                </div>
+              </div>
+
+              <!-- Bottom Section -->
+              <div class="relative z-10 mt-auto w-full">
+                <h3 class="text-2xl font-extrabold tracking-wide drop-shadow-md mb-1.5 leading-snug">
+                  {{ parcours.nom }}
+                </h3>
+                <p class="text-xs font-medium tracking-wider uppercase opacity-95 mb-3"
+                  [class]="visual.subColor">
+                  {{ parcours.duree }} &bull; {{ parcours.placesDisponibles }} places
+                </p>
+
+                <div class="flex items-center justify-between pt-3 border-t border-white/20 text-xs font-medium">
+                  <span class="flex items-center gap-1.5 animate-pulse" [class]="visual.actionPulse">
+                    <lucide-icon name="rotate-cw" class="w-4 h-4"></lucide-icon>
+                    Survolez pour les détails
+                  </span>
+                  <span class="text-gray-300 font-mono">0{{ idx + 1 }}/0{{ filteredParcours().length }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- BACK FACE -->
+            <div class="flip-card-back">
+              <div class="relative z-10 flex flex-col h-full justify-between">
+                <div>
+                  <div class="flex justify-between items-center mb-3 pb-3 border-b"
+                    [class]="visual.borderBack">
+                    <h3 class="font-bold text-xl text-transparent bg-clip-text bg-gradient-to-r leading-tight"
+                      [class]="visual.titleGrad">
+                      {{ parcours.nom }}
+                    </h3>
+                    <span class="px-2 py-1 rounded-lg text-xs font-bold border shrink-0"
+                      [class]="visual.badgeBack">
+                      {{ parcours.universite }}
+                    </span>
+                  </div>
+
+                  <!-- Features / Debouches clés -->
+                  <div class="space-y-3">
+                    <h4 class="font-semibold text-xs uppercase tracking-widest text-slate-500">
+                      Débouchés professionnels clés
+                    </h4>
+                    <ul class="text-xs text-gray-700 space-y-2">
+                      <li *ngFor="let deb of parcours.debouches.slice(0, 3)" class="flex items-start">
+                        <lucide-icon name="check-circle-2" class="w-4 h-4 mr-2 mt-0.5 flex-shrink-0"
+                          [class]="visual.iconColor"></lucide-icon>
+                        <span class="font-medium">{{ deb }}</span>
+                      </li>
+                    </ul>
+                  </div>
+
+                  <!-- Compétences chips -->
+                  <div class="mt-3">
+                    <h4 class="font-semibold text-[11px] uppercase tracking-widest text-slate-400 mb-1.5">
+                      Compétences clés
+                    </h4>
+                    <div class="flex flex-wrap gap-1">
+                      <span *ngFor="let c of parcours.competences.slice(0, 3)"
+                        class="px-2 py-0.5 bg-slate-100 text-slate-700 rounded-md text-[10px] font-medium">
+                        {{ c }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Back Bottom Buttons -->
+                <div class="pt-3 border-t space-y-2" [class]="visual.borderBack">
+                  <div
+                    class="w-full py-2 px-3 bg-gradient-to-r rounded-lg text-[11px] font-medium text-center line-clamp-2"
+                    [class]="visual.descBg">
+                    {{ parcours.description }}
+                  </div>
+
+                  <div class="flex gap-2">
+                    <button (click)="openDetails(parcours)"
+                      class="flex-1 py-2 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition-colors">
+                      Détails complets
+                    </button>
+                    <button (click)="openPreinscription(parcours)"
+                      class="flex-1 py-2 px-3 bg-gradient-to-r text-white rounded-lg font-semibold text-xs text-center flex items-center justify-center gap-1.5 shadow-md transition-all duration-300"
+                      [class]="visual.btnGrad">
+                      <lucide-icon name="check-circle" class="w-3.5 h-3.5"></lucide-icon>
+                      <span>Préinscription</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </ng-container>
+      </div>
+
+    </div><!-- end parcours-grid -->
+
+    <!-- Bouton Flèche DROITE -->
+    <button (mouseenter)="startContinuousScroll('right')" (mouseleave)="stopContinuousScroll()"
+      (touchstart)="startContinuousScroll('right')" (touchend)="stopContinuousScroll()" (click)="scrollRight()"
+      aria-label="Défiler vers la droite" class="parcours-side-arrow flex-shrink-0">
+      <lucide-icon name="chevron-right" class="w-6 h-6"></lucide-icon>
+    </button>
+
+  </div><!-- end flex row -->
+
+  <!-- Detail Modal -->
+  <div *ngIf="selectedParcoursForDetails()"
+    class="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
+    <div
+      class="bg-white rounded-2xl max-w-xl w-full p-6 shadow-2xl relative animate-in fade-in duration-200 max-h-[90vh] overflow-y-auto">
+      <button (click)="closeDetails()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
+        <lucide-icon name="x" class="w-5 h-5"></lucide-icon>
+      </button>
+
+      <div class="flex items-center gap-2 mb-3">
+        <span class="px-2.5 py-1 rounded-lg text-xs font-bold bg-blue-50 text-[#1d4b99] border border-blue-200">
+          {{ selectedParcoursForDetails()?.universite }}
+        </span>
+        <span class="text-xs font-medium text-slate-500">
+          {{ selectedParcoursForDetails()?.type }} &bull; {{ selectedParcoursForDetails()?.duree }}
+        </span>
+      </div>
+
+      <h2 class="text-2xl font-bold text-slate-900 mb-3">
+        {{ selectedParcoursForDetails()?.nom }}
+      </h2>
+
+      <p class="text-sm text-slate-600 leading-relaxed mb-6">
+        {{ selectedParcoursForDetails()?.description }}
+      </p>
+
+      <!-- Competences -->
+      <div class="mb-5">
+        <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+          Compétences développées
+        </h4>
+        <div class="flex flex-wrap gap-2">
+          <span *ngFor="let c of selectedParcoursForDetails()?.competences"
+            class="px-2.5 py-1 bg-blue-50 text-blue-800 text-xs rounded-lg font-medium">
+            {{ c }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Debouches -->
+      <div class="mb-6">
+        <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+          Tous les débouchés professionnels
+        </h4>
+        <ul class="space-y-1.5 text-xs text-slate-700">
+          <li *ngFor="let d of selectedParcoursForDetails()?.debouches" class="flex items-center gap-2">
+            <lucide-icon name="check" class="w-3.5 h-3.5 text-emerald-600"></lucide-icon>
+            <span>{{ d }}</span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="flex justify-end gap-3 pt-4 border-t border-slate-100">
+        <button (click)="closeDetails()"
+          class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100">
+          Fermer
+        </button>
+        <button (click)="openPreinscription(selectedParcoursForDetails()!); closeDetails()"
+          class="px-5 py-2 rounded-xl text-xs font-bold bg-[#1d4b99] text-white hover:bg-[#153c80]">
+          Faire la préinscription
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Preinscription Modal -->
+  <div *ngIf="isPreinscriptionModalOpen()"
+    class="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl relative animate-in fade-in duration-200">
+      <button (click)="closePreinscription()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
+        <lucide-icon name="x" class="w-5 h-5"></lucide-icon>
+      </button>
+
+      <div class="mb-4">
+        <span class="text-xs font-bold uppercase tracking-wider text-[#1d4b99]">
+          Dossier de candidature
+        </span>
+        <h2 class="text-xl font-bold text-slate-900">
+          Préinscription : {{ preinscriptionParcours()?.nom }}
+        </h2>
+        <p class="text-xs text-slate-500 mt-1">
+          Campus {{ preinscriptionParcours()?.universite }} &bull; Remplissez vos coordonnées pour valider votre
+          demande.
+        </p>
+      </div>
+
+      <div *ngIf="successMessage()"
+        class="mb-4 p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl text-xs font-semibold flex items-center gap-2">
+        <lucide-icon name="check-circle" class="w-4 h-4 text-emerald-600"></lucide-icon>
+        <span>{{ successMessage() }}</span>
+      </div>
+
+      <form (ngSubmit)="soumettrePreinscription()" class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Nom et Prénom</label>
+          <input type="text" [(ngModel)]="formNom" name="nom" required
+            class="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-[#1d4b99] outline-none" />
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Email de contact</label>
+          <input type="email" [(ngModel)]="formEmail" name="email" required
+            class="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-[#1d4b99] outline-none" />
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Téléphone</label>
+            <input type="text" [(ngModel)]="formPhone" name="phone"
+              class="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-[#1d4b99] outline-none" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Type de Bac / Diplôme</label>
+            <input type="text" [(ngModel)]="formBac" name="bac"
+              class="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-[#1d4b99] outline-none" />
+          </div>
+        </div>
+
+        <div class="p-3 bg-blue-50 border border-blue-100 rounded-xl text-xs text-blue-900 leading-relaxed">
+          <p class="font-semibold mb-1">ℹ️ Étape suivante après préinscription :</p>
+          <p>Vous pourrez passer le <strong>QCM adaptatif</strong> pour affiner votre orientation et avoir un entretien
+            d'admission avec un enseignant référent.</p>
+        </div>
+
+        <div class="flex justify-end gap-3 pt-3">
+          <button type="button" (click)="closePreinscription()"
+            class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100">
+            Annuler
+          </button>
+          <button type="submit"
+            class="px-5 py-2 rounded-xl text-xs font-bold bg-[#1d4b99] text-white hover:bg-[#153c80] shadow-sm">
+            Confirmer la préinscription
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+</div>

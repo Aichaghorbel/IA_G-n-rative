@@ -1,0 +1,435 @@
+<div class="space-y-6 relative font-sans">
+
+  <!-- Header (Style Students & Enseignant) -->
+  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <div>
+      <div class="flex items-center gap-2.5">
+        <h1 class="text-2xl font-bold text-slate-900">Profils Candidats</h1>
+
+      </div>
+      <p class="text-slate-500 text-sm mt-1">
+        Consultez les résultats aux QCM, recommandations IA, puis validez ou ajustez l'orientation des étudiants {{
+        teacherUni() }}.
+      </p>
+    </div>
+  </div>
+
+  <!-- Filters & Search -->
+  <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-col lg:flex-row gap-4">
+    <div class="relative flex-1">
+      <lucide-icon name="search"
+        class="w-5 h-5 absolute left-2 top-1/2 transform -translate-y-1/2 text-slate-400"></lucide-icon>
+      <input type="text" placeholder="Rechercher par candidat, email, filière, baccalauréat..."
+        [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event)" [style.paddingLeft]="'3rem'"
+        class="w-full pr-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-[#1d4b99] focus:border-[#1d4b99] outline-none" />
+    </div>
+
+    <div class="relative">
+      <button (click)="toggleFilter()"
+        class="flex items-center space-x-2 px-4 py-2 border border-slate-300 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors">
+        <lucide-icon name="filter" class="w-4 h-4"></lucide-icon>
+        <span>Filtrer</span>
+        <lucide-icon name="chevron-down" class="w-4 h-4"></lucide-icon>
+      </button>
+
+      <!-- Filter Dropdown -->
+      <div *ngIf="isFilterOpen()"
+        class="absolute right-0 top-full mt-2 w-72 bg-white rounded-xl shadow-lg border border-slate-200 p-4 z-50 space-y-4">
+        <div>
+          <label class="block text-xs font-medium text-slate-700 mb-1.5 uppercase">Statut d'orientation</label>
+          <select [ngModel]="statusFilter()" (ngModelChange)="statusFilter.set($event)"
+            class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-[#1d4b99] outline-none">
+            <option value="">Tous les statuts</option>
+            <option value="Orientation validée">Validée</option>
+            <option value="Orientation ajustée">Ajustée</option>
+            <option value="En attente entretien">À valider</option>
+          </select>
+        </div>
+        <!-- <div>
+          <label class="block text-xs font-medium text-slate-700 mb-1.5 uppercase">QCM Adaptatif</label>
+          <select [ngModel]="qcmFilter()" (ngModelChange)="qcmFilter.set($event)"
+            class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-[#1d4b99] outline-none">
+            <option value="">Tous</option>
+            <option value="Passe">QCM passé</option>
+            <option value="NonPasse">En attente de QCM</option>
+          </select>
+        </div> -->
+        <button (click)="clearFilters()"
+          class="w-full px-3 py-2 text-sm text-slate-600 hover:text-slate-900 border-t border-slate-100 pt-3">
+          Réinitialiser les filtres
+        </button>
+      </div>
+      <!-- Overlay to close filter -->
+      <div *ngIf="isFilterOpen()" (click)="toggleFilter()" class="fixed inset-0 z-40 bg-transparent"></div>
+    </div>
+  </div>
+
+  <!-- Table des Candidats & Orientation -->
+  <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm text-left">
+        <thead class="text-xs text-slate-500 uppercase bg-slate-50 border-b border-slate-200">
+          <tr>
+            <th class="px-4 py-4 font-medium">Candidat</th>
+            <th class="px-3 py-4 font-medium w-[140px] max-w-[140px]">Parcours souhaité</th>
+            <th class="px-4 py-4 font-medium">Score QCM</th>
+            <th class="px-4 py-4 font-medium">Recommandation IA</th>
+            <th class="px-3 py-4 font-medium w-[155px] max-w-[155px]">Orientation</th>
+            <th class="px-4 py-4 font-medium whitespace-nowrap">Avis enseignant</th>
+            <th class="px-4 py-4 font-medium text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          <tr *ngFor="let c of paginatedCandidats()" class="hover:bg-slate-50 transition-colors">
+
+            <!-- Candidat avec Avatar et Initiales -->
+            <td class="px-4 py-4">
+              <div class="flex items-center space-x-3">
+                <div
+                  class="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center text-[#1d4b99] font-bold text-xs border border-slate-200 shrink-0">
+                  {{ c.nom.substring(0, 2).toUpperCase() }}
+                </div>
+                <div>
+                  <div class="font-medium text-slate-900 flex items-center gap-1.5">
+                    <span>{{ c.nom }}</span>
+                  </div>
+                  <div class="text-slate-500 text-xs">{{ c.email }} </div>
+                </div>
+              </div>
+            </td>
+
+            <!-- Université & Vœu de formation -->
+            <td class="px-3 py-4 w-[140px] max-w-[140px]">
+              <span [title]="c.filiereSouhaitee" class="block font-medium text-slate-900 text-xs truncate">{{
+                c.filiereSouhaitee }}</span>
+            </td>
+
+            <!-- Score QCM (Barre horizontale + Pourcentage avec règles: vert >=50%, jaune 20-50%, rouge <20%) -->
+            <td class="px-4 py-4">
+              <div *ngIf="c.qcmPasse" class="flex items-center space-x-2.5">
+                <div class="w-16 bg-slate-100 rounded-full h-2.5 overflow-hidden shrink-0">
+                  <div class="h-full rounded-full transition-all duration-300" [style.width.%]="c.scoreQcm || 0"
+                    [ngClass]="getScoreColorClass(c.scoreQcm).bar">
+                  </div>
+                </div>
+                <span class="font-bold text-slate-800 text-sm min-w-[34px]">{{ c.scoreQcm }}%</span>
+              </div>
+              <div *ngIf="!c.qcmPasse">
+                <span class="inline-flex items-center text-xs text-slate-400 italic">
+                  <lucide-icon name="clock" class="w-3.5 h-3.5 mr-1 text-slate-400"></lucide-icon>
+                  En attente
+                </span>
+              </div>
+            </td>
+
+            <!-- Recommandation IA -->
+            <td class="px-4 py-4">
+              <div *ngIf="c.qcmPasse" class="font-medium text-slate-900 text-sm">
+                {{ getRecoFiliere(c) }}
+              </div>
+              <div *ngIf="!c.qcmPasse" class="text-xs text-slate-400 italic">
+                En attente du test
+              </div>
+            </td>
+
+            <!-- Statut d'orientation (Avec icônes conservées) -->
+            <td class="px-3 py-4 w-[155px] max-w-[155px]">
+              <span
+                class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold border whitespace-nowrap"
+                [ngClass]="{
+                  'bg-emerald-50 text-emerald-700 border-emerald-200': c.statutOrientation === 'Orientation validée',
+                  'bg-purple-50 text-purple-700 border-purple-200': c.statutOrientation === 'Orientation ajustée',
+                  'bg-amber-50 text-amber-700 border-amber-200': c.statutOrientation === 'En attente entretien',
+                  'bg-slate-100 text-slate-600 border-slate-200': c.statutOrientation === 'En attente QCM'
+                }">
+                <lucide-icon
+                  [name]="c.statutOrientation === 'Orientation validée' ? 'check-circle' : (c.statutOrientation === 'Orientation ajustée' ? 'edit-2' : 'clock')"
+                  class="w-3.5 h-3.5 mr-1 shrink-0" [ngClass]="{
+                    'text-emerald-600': c.statutOrientation === 'Orientation validée',
+                    'text-purple-600': c.statutOrientation === 'Orientation ajustée',
+                    'text-amber-600': c.statutOrientation === 'En attente entretien',
+                    'text-slate-400': c.statutOrientation === 'En attente QCM'
+                  }"></lucide-icon>
+                {{ getOrientationLabel(c.statutOrientation) }}
+              </span>
+
+              <div
+                *ngIf="(c.statutOrientation === 'Orientation validée' || c.statutOrientation === 'Orientation ajustée') && c.orientationValidee"
+                [title]="c.orientationValidee"
+                class="text-[11px] text-slate-900 font-medium mt-1 truncate max-w-[140px]">
+                &rarr; {{ c.orientationValidee }}
+              </div>
+            </td>
+
+            <!-- Avis de l'enseignant -->
+            <td class="px-4 py-4">
+              <ng-container *ngIf="getAvisEnseignant(c.id) as avis; else avisEnAttente">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-semibold border"
+                  [ngClass]="avis === 'Favorable' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-red-50 text-red-700 border-red-200'">
+                  {{ avis }}
+                </span>
+              </ng-container>
+              <ng-template #avisEnAttente>
+                <span class="text-xs text-slate-400 italic">En attente</span>
+              </ng-template>
+            </td>
+
+            <!-- Actions (Consulter profil, Valider, Ajuster) -->
+            <td class="px-6 py-4 text-right">
+              <div class="flex items-center justify-end space-x-1">
+
+                <!-- Voir profil -->
+                <button (click)="viewProfile(c)" title="Consulter le dossier complet"
+                  class="p-2 text-[#1d4b99] hover:bg-blue-50 rounded-lg transition-colors">
+                  <lucide-icon name="eye" class="w-4 h-4"></lucide-icon>
+                </button>
+
+                <!-- Valider Orientation -->
+                <button *ngIf="c.statutOrientation !== 'Orientation validée'" (click)="validerOrientation(c, $event)"
+                  title="Valider l'orientation"
+                  class="p-2 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors">
+                  <lucide-icon name="check" class="w-4 h-4 stroke-[2.5]"></lucide-icon>
+                </button>
+
+                <!-- Ajuster Orientation -->
+                <button (click)="openAjusterModal(c, $event)" title="Ajuster l'orientation"
+                  class="p-2 text-purple-600 hover:bg-purple-50 rounded-lg transition-colors">
+                  <lucide-icon name="edit-2" class="w-4 h-4"></lucide-icon>
+                </button>
+
+              </div>
+            </td>
+
+          </tr>
+          <tr *ngIf="paginatedCandidats().length === 0">
+            <td colspan="7" class="px-6 py-12 text-center text-slate-500 italic bg-slate-50/50">
+              Aucun candidat trouvé avec ces critères de recherche.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination (Style Students) -->
+    <div
+      class="p-4 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-slate-500 bg-slate-50/50">
+      <span>Affichage de {{ startIndex() + 1 }} à {{ endIndex() }} sur {{ filteredCount() }} candidats</span>
+      <div class="flex items-center gap-1">
+        <button (click)="prevPage()" [disabled]="currentPage() === 1"
+          class="px-2 py-1 border border-slate-300 rounded-md bg-white disabled:opacity-50">&lt;</button>
+        <div class="flex gap-1">
+          <button *ngFor="let p of pageNumbers()" (click)="goToPage(p)"
+            class="w-8 h-8 rounded-md transition-all font-medium" [class.bg-[#1d4b99]]="currentPage() === p"
+            [class.text-white]="currentPage() === p" [class.hover:bg-slate-200]="currentPage() !== p">{{ p }}</button>
+        </div>
+        <button (click)="nextPage()" [disabled]="currentPage() === totalPages()"
+          class="px-2 py-1 border border-slate-300 rounded-md bg-white disabled:opacity-50">&gt;</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Profil Candidat Complet (Design Students Modal) -->
+  <div *ngIf="selectedCandidat()">
+    <div (click)="closeProfile()" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50" [@fadeIn]></div>
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div class="w-full max-w-2xl bg-white rounded-2xl shadow-xl overflow-hidden flex flex-col max-h-[90vh]"
+        [@modalSlide]>
+
+        <!-- Header -->
+        <div class="px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50 shrink-0">
+          <h3 class="text-lg font-bold text-slate-900">Dossier Candidat & Orientation</h3>
+          <button (click)="closeProfile()"
+            class="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-200 transition-colors">
+            <lucide-icon name="x" class="w-5 h-5"></lucide-icon>
+          </button>
+        </div>
+
+        <div class="overflow-y-auto overflow-x-hidden">
+
+          <!-- Banner -->
+          <div class="h-28 bg-slate-800 relative">
+            <div class="absolute inset-0 opacity-40 bg-cover bg-center"
+              style="background-image: url('assets/images/couverture2.jpg')">
+            </div>
+          </div>
+
+          <div class="px-6 pb-6 relative">
+
+            <!-- Avatar -->
+            <div class="flex items-end -mt-12 mb-4">
+              <div
+                class="w-24 h-24 rounded-full border-4 border-white shadow-lg bg-white flex items-center justify-center text-[#1d4b99] text-3xl font-bold overflow-hidden">
+                {{ selectedCandidat()?.nom?.substring(0, 2)?.toUpperCase() }}
+              </div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-6">
+              <div>
+                <h2 class="text-2xl font-bold text-slate-900">{{ selectedCandidat()?.nom }}</h2>
+                <div class="flex flex-wrap items-center gap-4 text-slate-500 text-sm mt-1">
+                  <span class="flex items-center">
+                    <lucide-icon name="mail" class="w-4 h-4 mr-1.5 text-slate-400"></lucide-icon>
+                    {{ selectedCandidat()?.email }}
+                  </span>
+                  <span class="flex items-center">
+                    <lucide-icon name="phone" class="w-4 h-4 mr-1.5 text-slate-400"></lucide-icon>
+                    {{ selectedCandidat()?.phone }}
+                  </span>
+                </div>
+              </div>
+
+              <!-- Statut Badge -->
+              <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider"
+                [ngClass]="{
+                  'bg-emerald-100 text-emerald-700': selectedCandidat()?.statutOrientation === 'Orientation validée',
+                  'bg-purple-100 text-purple-700': selectedCandidat()?.statutOrientation === 'Orientation ajustée',
+                  'bg-amber-100 text-amber-700': selectedCandidat()?.statutOrientation === 'En attente entretien',
+                  'bg-slate-100 text-slate-700': selectedCandidat()?.statutOrientation === 'En attente QCM'
+                }">
+                {{ selectedCandidat()?.statutOrientation }}
+              </span>
+            </div>
+
+            <!-- Grids -->
+            <div>
+
+              <!-- 1. Informations Personnelles & Préinscription -->
+              <div class="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm h-fit">
+                <div class="px-5 py-3 border-b border-slate-100 bg-slate-50 flex items-center gap-2">
+                  <lucide-icon name="user" class="w-4 h-4 text-[#1d4b99]"></lucide-icon>
+                  <h4 class="text-sm font-bold text-slate-900">Informations & Cursus</h4>
+                </div>
+                <div class="divide-y divide-slate-100 text-xs">
+                  <div class="px-5 py-3 flex justify-between">
+                    <span class="text-slate-500">Nom & Prénom</span>
+                    <span class="font-medium text-slate-900">{{ selectedCandidat()?.nom }}</span>
+                  </div>
+                  <div class="px-5 py-3 flex justify-between">
+                    <span class="text-slate-500">Dernier diplôme obtenu</span>
+                    <span class="font-medium text-slate-900">{{ selectedCandidat()?.bac || 'Non renseigné' }}</span>
+                  </div>
+                  <div class="px-5 py-3 flex justify-between">
+                    <span class="text-slate-500">Université Souhaitée</span>
+                    <span class="font-bold text-[#1d4b99]">{{ selectedCandidat()?.universiteSouhaitee }}</span>
+                  </div>
+                  <div class="px-5 py-3 flex justify-between">
+                    <span class="text-slate-500">Filière Souhaitée</span>
+                    <span class="font-medium text-slate-900">{{ selectedCandidat()?.filiereSouhaitee }}</span>
+                  </div>
+
+                </div>
+              </div>
+
+              <!-- 2. Résultats QCM & IA -->
+              <!-- <div class="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm h-fit">
+                <div class="px-5 py-3 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
+                  <div class="flex items-center gap-2">
+                    <lucide-icon name="sparkles" class="w-4 h-4 text-amber-500"></lucide-icon>
+                    <h4 class="text-sm font-bold text-slate-900">Évaluation QCM & IA</h4>
+                  </div>
+                  <span *ngIf="selectedCandidat()?.scoreQcm"
+                    class="px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">
+                    {{ selectedCandidat()?.scoreQcm }}%
+                  </span>
+                </div>
+
+                <div class="p-5 space-y-3 text-xs">
+                  <div>
+                    <span class="text-slate-500 block mb-1">Recommandation du moteur IA d'orientation :</span>
+                    <div
+                      class="p-3 bg-blue-50/70 border border-blue-100 rounded-xl text-blue-900 leading-relaxed font-medium">
+                      {{ selectedCandidat()?.recommandationIA || 'Le candidat n’a pas encore finalisé son test
+                      adaptatif.' }}
+                    </div>
+                  </div>
+
+                  <div *ngIf="selectedCandidat()?.orientationValidee" class="pt-2 border-t border-slate-100">
+                    <span class="text-slate-500 block mb-1">Orientation retenue :</span>
+                    <span class="font-bold text-slate-900 text-sm">{{ selectedCandidat()?.orientationValidee }}</span>
+                  </div>
+
+                  <div *ngIf="selectedCandidat()?.ajustementMotif"
+                    class="p-2.5 bg-purple-50 border border-purple-100 rounded-lg text-purple-900">
+                    <span class="font-bold block text-[11px] mb-0.5">Motif de réorientation :</span>
+                    <p class="text-[11px]">{{ selectedCandidat()?.ajustementMotif }}</p>
+                  </div>
+                </div>
+              </div> -->
+
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Modal Footer Actions -->
+        <div
+          class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex flex-wrap justify-end items-center gap-3 shrink-0">
+          <button (click)="closeProfile()"
+            class="px-4 py-2 border border-slate-300 bg-white hover:bg-slate-50 text-slate-800 rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow-sm transition-colors">
+            <span>Fermer</span>
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Ajuster l'Orientation (Design Students Modal) -->
+  <div *ngIf="candidatAjustement()">
+    <div (click)="closeAjusterModal()" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50" [@fadeIn]></div>
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div class="w-full max-w-lg bg-white rounded-2xl shadow-xl overflow-hidden flex flex-col max-h-[90vh]"
+        [@modalSlide]>
+
+        <div class="px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50 shrink-0">
+          <div>
+            <h3 class="text-lg font-bold text-slate-900">Ajuster l'orientation</h3>
+            <p class="text-xs text-slate-500 mt-0.5">Pour {{ candidatAjustement()?.nom }}</p>
+          </div>
+          <button (click)="closeAjusterModal()"
+            class="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-200 transition-colors">
+            <lucide-icon name="x" class="w-5 h-5"></lucide-icon>
+          </button>
+        </div>
+
+        <div class="p-6 overflow-y-auto space-y-4">
+          <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs space-y-1">
+            <div class="text-slate-500"> Filière d'Orientation initial : <strong class="text-slate-900">{{
+                candidatAjustement()?.filiereSouhaitee }}</strong> ({{ candidatAjustement()?.universiteSouhaitee }})
+            </div>
+            <div *ngIf="candidatAjustement()?.scoreQcm" class="text-emerald-700 font-semibold">
+              Score au QCM : {{ candidatAjustement()?.scoreQcm }}%
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-medium text-slate-700 mb-1.5 uppercase">Nouvelle Filière
+              d'Orientation</label>
+            <select [(ngModel)]="nouvelleFiliere"
+              class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-[#1d4b99] outline-none">
+              <optgroup label="Institut International de Technologie (IIT)">
+                <option *ngFor="let f of filieresDisponibles.slice(0, 7)" [value]="f.nom">{{ f.nom }}</option>
+              </optgroup>
+              <optgroup label="International School of Business (ISB)">
+                <option *ngFor="let f of filieresDisponibles.slice(7)" [value]="f.nom">{{ f.nom }}</option>
+              </optgroup>
+            </select>
+          </div>
+        </div>
+
+        <div class="px-6 py-3 bg-slate-50 border-t border-slate-200 flex justify-end gap-3 shrink-0">
+          <button (click)="closeAjusterModal()"
+            class="px-4 py-2 border border-slate-300 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100 transition-colors">
+            Annuler
+          </button>
+          <button (click)="confirmerAjustement()"
+            class="px-4 py-2 bg-[#1d4b99] hover:bg-[#153c80] text-white rounded-lg text-sm font-medium transition-colors shadow-sm">
+            Enregistrer
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div>

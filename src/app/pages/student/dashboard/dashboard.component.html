@@ -5,7 +5,7 @@
     <div class="h-48 bg-slate-800 relative">
       <!-- Background Pattern placeholder -->
       <div class="absolute inset-0 opacity-30 bg-cover bg-center"
-        style="background-image: url('assets/images/couverture2.jpg')"></div>
+           style="background-image: url('assets/images/couverture2.jpg')"></div>
 
       <div
         class="relative z-10 h-full flex flex-col md:flex-row items-start md:items-center justify-between p-6 md:p-8 gap-4">
@@ -14,12 +14,12 @@
             Bonjour, {{ firstName() }}
           </h2>
           <p class="text-white/80 text-base max-w-lg leading-relaxed">
-            Bienvenue sur votre espace SmartCampus.
+            Bienvenue sur votre espace UniHelp. Voici un résumé de votre activité récente et vos outils à portée de
+            main.
           </p>
         </div>
-        <!-- <button (click)="navigateToChat()" -->
-        <button class="flex items-center gap-2 bg-white/90 text-slate-800 px-6 py-3 rounded-xl text-sm font-semibold
-          hover:bg-white hover:scale-105 transition-all duration-300 shadow-md shrink-0">
+        <button (click)="navigateToChat()"
+          class="flex items-center gap-2 bg-white/90 text-slate-800 px-6 py-3 rounded-xl text-sm font-semibold hover:bg-white hover:scale-105 transition-all duration-300 shadow-md shrink-0">
           <lucide-icon name="message-square" class="w-5 h-5 text-[#1d4b99]"></lucide-icon>
           <span>Poser une question</span>
         </button>
@@ -27,3 +27,74 @@
     </div>
   </div>
 
+  <!-- Key Metrics / Status Cards -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+    
+    <!-- Statut Préinscription -->
+    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-start justify-between">
+      <div>
+        <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Préinscription</span>
+        <h3 class="text-lg font-bold text-slate-900 mt-1">
+          {{ monCandidat()?.statutPreinscription || 'En attente' }}
+        </h3>
+        <p class="text-xs text-slate-500 mt-1 truncate max-w-[180px]">
+          {{ monCandidat()?.filiereSouhaitee || 'Aucun parcours choisi' }}
+        </p>
+      </div>
+      <div class="w-10 h-10 rounded-xl bg-blue-50 text-[#1d4b99] flex items-center justify-center shrink-0">
+        <lucide-icon name="file-text" class="w-5 h-5"></lucide-icon>
+      </div>
+    </div>
+
+    <!-- Statut QCM Adaptatif -->
+    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-start justify-between">
+      <div>
+        <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Test QCM Adaptatif</span>
+        <h3 class="text-lg font-bold text-slate-900 mt-1">
+          {{ monCandidat()?.qcmPasse ? (monCandidat()?.scoreQcm + '%') : 'À passer' }}
+        </h3>
+        <p class="text-xs text-slate-500 mt-1">
+          {{ monCandidat()?.qcmPasse ? 'Évaluation complétée' : 'Évaluez vos compétences' }}
+        </p>
+      </div>
+      <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+        <lucide-icon name="sparkles" class="w-5 h-5"></lucide-icon>
+      </div>
+    </div>
+
+    <!-- Rendez-vous Entretien -->
+    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-start justify-between">
+      <div>
+        <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Entretien d'Orientation</span>
+        <h3 class="text-lg font-bold text-slate-900 mt-1">
+          {{ monRendezVous() ? monRendezVous()?.date : 'À programmer' }}
+        </h3>
+        <p class="text-xs text-slate-500 mt-1">
+          {{ monRendezVous()?.heure ? ('Heure : ' + monRendezVous()?.heure) : 'Aucun créneau' }}
+        </p>
+      </div>
+      <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+        <lucide-icon name="calendar" class="w-5 h-5"></lucide-icon>
+      </div>
+    </div>
+
+    <!-- Décision / Statut Orientation -->
+    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-start justify-between">
+      <div>
+        <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Orientation Finale</span>
+        <h3 class="text-lg font-bold text-slate-900 mt-1">
+          {{ monCandidat()?.statutOrientation || 'En cours d\'analyse' }}
+        </h3>
+        <p class="text-xs text-slate-500 mt-1 truncate max-w-[180px]">
+          {{ monCandidat()?.orientationValidee || 'Validation enseignant en cours' }}
+        </p>
+      </div>
+      <div class="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
+        <lucide-icon name="check-circle" class="w-5 h-5"></lucide-icon>
+      </div>
+    </div>
+
+  </div>
+
+
+</div>

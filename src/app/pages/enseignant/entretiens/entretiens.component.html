@@ -1,0 +1,392 @@
+<div class="space-y-6 relative font-sans">
+
+  <!-- Header: Titre & Action (Style Students) -->
+  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <div>
+      <h1 class="text-2xl font-bold text-slate-900">Entretiens</h1>
+      <p class="text-slate-500 text-sm mt-1">
+        Planifiez et menez les entretiens d'orientation.
+      </p>
+    </div>
+
+    <button (click)="openPlanifierModal()"
+      class="flex items-center space-x-2 px-4 py-2 border border-transparent rounded-lg text-sm font-medium text-white bg-[#1d4b99] hover:bg-[#153c80] transition-colors shadow-sm">
+      <lucide-icon name="plus" class="w-4 h-4"></lucide-icon>
+      <span>Planifier un entretien</span>
+    </button>
+  </div>
+
+  <!-- Filters & Search (Style Students) -->
+  <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-col lg:flex-row gap-4">
+    <div class="relative flex-1">
+      <lucide-icon name="search"
+        class="w-5 h-5 absolute left-2 top-1/2 transform -translate-y-1/2 text-slate-400"></lucide-icon>
+      <input type="text" placeholder="Rechercher par candidat, email, lieu..." [ngModel]="searchQuery()"
+        (ngModelChange)="searchQuery.set($event)" [style.paddingLeft]="'3rem'"
+        class="w-full pr-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-[#1d4b99] focus:border-[#1d4b99] outline-none" />
+    </div>
+
+    <div class="relative">
+      <button (click)="toggleFilter()"
+        class="flex items-center space-x-2 px-4 py-2 border border-slate-300 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors">
+        <lucide-icon name="filter" class="w-4 h-4"></lucide-icon>
+        <span>Filtrer</span>
+        <lucide-icon name="chevron-down" class="w-4 h-4"></lucide-icon>
+      </button>
+
+      <!-- Filter Dropdown -->
+      <div *ngIf="isFilterOpen()"
+        class="absolute right-0 top-full mt-2 w-72 bg-white rounded-xl shadow-lg border border-slate-200 p-4 z-50 space-y-4">
+        <div>
+          <label class="block text-xs font-medium text-slate-700 mb-1.5 uppercase">Statut d'entretien</label>
+          <select [ngModel]="statutFilter()" (ngModelChange)="statutFilter.set($event)"
+            class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-[#1d4b99] outline-none">
+            <option value="TOUS">Tous les statuts</option>
+            <option value="Planifié">Planifié</option>
+            <option value="Terminé">Terminé</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-700 mb-1.5 uppercase">Avis enseignant</label>
+          <select [ngModel]="avisFilter()" (ngModelChange)="avisFilter.set($event)"
+            class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-[#1d4b99] outline-none">
+            <option value="TOUS">Tous les avis</option>
+            <option value="Favorable">Favorable</option>
+            <option value="Défavorable">Défavorable</option>
+          </select>
+        </div>
+        <button (click)="clearFilters()"
+          class="w-full px-3 py-2 text-sm text-slate-600 hover:text-slate-900 border-t border-slate-100 pt-3">
+          Réinitialiser les filtres
+        </button>
+      </div>
+      <!-- Overlay to close filter -->
+      <div *ngIf="isFilterOpen()" (click)="toggleFilter()" class="fixed inset-0 z-40 bg-transparent"></div>
+    </div>
+  </div>
+
+  <!-- Table des Entretiens (Style Students) -->
+  <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm text-left">
+        <thead class="text-xs text-slate-500 uppercase bg-slate-50 border-b border-slate-200">
+          <tr>
+            <th class="px-6 py-4 font-medium">Candidat</th>
+            <th class="px-6 py-4 font-medium">Date & Heure</th>
+            <th class="px-6 py-4 font-medium">Lieu / Salle</th>
+            <th class="px-6 py-4 font-medium">Statut</th>
+            <th class="px-6 py-4 font-medium">Avis / Décision</th>
+            <th class="px-6 py-4 font-medium text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          <tr *ngFor="let ent of paginatedEntretiens()" class="hover:bg-slate-50 transition-colors">
+
+            <!-- Candidat avec Avatar et Initiales (identique à students) -->
+            <td class="px-6 py-4">
+              <div class="flex items-center space-x-3">
+                <div
+                  class="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center text-[#1d4b99] font-bold text-xs border border-slate-200">
+                  {{ ent.candidatNom.substring(0, 2).toUpperCase() }}
+                </div>
+                <div>
+                  <div class="font-medium text-slate-900">{{ ent.candidatNom }}</div>
+                  <div class="text-slate-500 text-xs">{{ ent.candidatEmail }}</div>
+                </div>
+              </div>
+            </td>
+
+            <!-- Date & Heure -->
+            <td class="px-6 py-4">
+              <div class="flex items-center space-x-1.5 text-slate-900 font-medium">
+                <lucide-icon name="calendar" class="w-4 h-4 text-[#1d4b99]"></lucide-icon>
+                <span>{{ ent.date }}</span>
+              </div>
+              <div class="text-slate-500 text-xs mt-0.5">à {{ ent.heure }}</div>
+            </td>
+
+            <!-- Lieu / Salle (Icône Localisation si salle, Appel Vidéo si visio) -->
+            <td class="px-6 py-4">
+              <span
+                class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold border max-w-xs truncate"
+                [ngClass]="isVisio(ent.salleOuLien) ? 'bg-[#1d4b99]/10 text-[#1d4b99] border-[#1d4b99]/25' : 'bg-slate-100 text-slate-800 border-slate-200'">
+                <lucide-icon [name]="isVisio(ent.salleOuLien) ? 'video' : 'map-pin'" class="w-3.5 h-3.5 mr-1.5 shrink-0"
+                  [ngClass]="isVisio(ent.salleOuLien) ? 'text-[#1d4b99]' : 'text-slate-600'"></lucide-icon>
+                <span class="truncate">{{ ent.salleOuLien }}</span>
+              </span>
+            </td>
+
+            <!-- Statut badge (Style Students) -->
+            <td class="px-6 py-4">
+              <span
+                class="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider"
+                [ngClass]="{
+                  'bg-emerald-100 text-emerald-700': ent.statut === 'Terminé',
+                  'bg-[#1d4b99]/10 text-[#1d4b99] border border-[#1d4b99]/25': ent.statut === 'Planifié',
+                  'bg-amber-100 text-amber-700': ent.statut === 'En cours'
+                }">
+                <lucide-icon [name]="ent.statut === 'Terminé' ? 'check-circle' : 'clock'" class="w-3.5 h-3.5 mr-1.5"
+                  [ngClass]="ent.statut === 'Planifié' ? 'text-[#1d4b99]' : ''"></lucide-icon>
+                {{ ent.statut }}
+              </span>
+            </td>
+
+            <!-- Avis / Décision -->
+            <td class="px-6 py-4">
+              <div *ngIf="ent.avisEnseignant" class="flex flex-col">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-semibold w-fit" [ngClass]="{
+                    'bg-emerald-50 text-emerald-700 border border-emerald-200': ent.avisEnseignant === 'Favorable',
+                    'bg-red-50 text-red-700 border border-red-200': ent.avisEnseignant === 'Défavorable'
+                  }">
+                  {{ ent.avisEnseignant }}
+                </span>
+                <span *ngIf="ent.orientationFinale" class="text-slate-500 text-xs mt-1 truncate max-w-[200px]">
+                  {{ ent.orientationFinale }}
+                </span>
+              </div>
+              <span *ngIf="!ent.avisEnseignant" class="text-slate-400 italic text-xs">En attente</span>
+            </td>
+
+            <!-- Action Button -->
+            <td class="px-6 py-4 text-right">
+              <button (click)="openMenerModal(ent)"
+                [class]="ent.statut === 'Terminé' ? 'border border-slate-300 text-slate-700 hover:bg-slate-50' : 'bg-[#1d4b99] text-white hover:bg-[#153c80]'"
+                class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors shadow-sm inline-flex items-center gap-1.5">
+                <lucide-icon [name]="ent.statut === 'Terminé' ? 'file-text' : 'user-check'"
+                  class="w-3.5 h-3.5"></lucide-icon>
+                <span>{{ ent.statut === 'Terminé' ? 'Compte-rendu' : 'Mener' }}</span>
+              </button>
+            </td>
+
+          </tr>
+          <tr *ngIf="paginatedEntretiens().length === 0">
+            <td colspan="6" class="px-6 py-12 text-center text-slate-500 italic bg-slate-50/50">
+              Aucun entretien trouvé avec ces critères.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination (Style Students) -->
+    <div
+      class="p-4 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-slate-500 bg-slate-50/50">
+      <span>Affichage de {{ startIndex() + 1 }} à {{ endIndex() }} sur {{ filteredCount() }} entretiens</span>
+      <div class="flex items-center gap-1">
+        <button (click)="prevPage()" [disabled]="currentPage() === 1"
+          class="px-2 py-1 border border-slate-300 rounded-md bg-white disabled:opacity-50">&lt;</button>
+        <div class="flex gap-1">
+          <button *ngFor="let p of pageNumbers()" (click)="goToPage(p)"
+            class="w-8 h-8 rounded-md transition-all font-medium" [class.bg-[#1d4b99]]="currentPage() === p"
+            [class.text-white]="currentPage() === p" [class.hover:bg-slate-200]="currentPage() !== p">{{ p }}</button>
+        </div>
+        <button (click)="nextPage()" [disabled]="currentPage() === totalPages()"
+          class="px-2 py-1 border border-slate-300 rounded-md bg-white disabled:opacity-50">&gt;</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Planifier un Entretien (Conforme à la maquette) -->
+  <div *ngIf="isPlanifierModalOpen()">
+    <div (click)="closePlanifierModal()" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50" [@fadeIn]></div>
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div class="w-full max-w-md bg-white rounded-2xl shadow-xl overflow-hidden flex flex-col max-h-[90vh]"
+        [@modalSlide]>
+
+        <!-- Modal Header -->
+        <div class="px-6 py-5 border-b border-slate-100 flex items-center justify-between shrink-0">
+          <h3 class="text-xl font-bold text-slate-900">Planifier un entretien</h3>
+          <button (click)="closePlanifierModal()"
+            class="text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-slate-100 transition-colors">
+            <lucide-icon name="x" class="w-5 h-5"></lucide-icon>
+          </button>
+        </div>
+
+        <!-- Modal Body -->
+        <div class="p-6 overflow-y-auto space-y-4">
+          <!-- Candidat -->
+          <div>
+            <label class="block text-sm font-semibold text-slate-800 mb-1.5">Candidat</label>
+            <select [ngModel]="selectedCandidatForPlanif()?.id || ''" (ngModelChange)="onCandidatPlanifChange($event)"
+              class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-sm bg-white focus:ring-2 focus:ring-[#1d4b99]/30 focus:border-[#1d4b99] outline-none transition-all">
+              <option value="" disabled selected>Sélectionner un candidat</option>
+              <option *ngFor="let c of candidats()" [value]="c.id">
+                {{ c.nom }} — {{ c.filiereSouhaitee }} ({{ c.universiteSouhaitee }})
+              </option>
+            </select>
+          </div>
+
+          <!-- Date & Heure -->
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-sm font-semibold text-slate-800 mb-1.5">Date</label>
+              <input type="date" [(ngModel)]="formDate"
+                class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-sm bg-white focus:ring-2 focus:ring-[#1d4b99]/30 focus:border-[#1d4b99] outline-none transition-all" />
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-slate-800 mb-1.5">Heure</label>
+              <input type="time" [(ngModel)]="formHeure"
+                class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-sm bg-white focus:ring-2 focus:ring-[#1d4b99]/30 focus:border-[#1d4b99] outline-none transition-all" />
+            </div>
+          </div>
+
+          <!-- Format (Présentiel / Visio) -->
+          <div>
+            <label class="block text-sm font-semibold text-slate-800 mb-1.5">Format</label>
+            <div class="grid grid-cols-2 p-1 bg-slate-100 rounded-xl gap-1 border border-slate-200">
+              <button type="button" (click)="setFormat('Présentiel')"
+                [class]="formFormat() === 'Présentiel' ? 'bg-white text-[#1d4b99] font-bold shadow-sm' : 'text-slate-600 hover:text-slate-900 font-medium'"
+                class="py-2.5 rounded-lg text-sm text-center transition-all">
+                Présentiel
+              </button>
+              <button type="button" (click)="setFormat('Visio')"
+                [class]="formFormat() === 'Visio' ? 'bg-white text-[#1d4b99] font-bold shadow-sm' : 'text-slate-600 hover:text-slate-900 font-medium'"
+                class="py-2.5 rounded-lg text-sm text-center transition-all">
+                Visio
+              </button>
+            </div>
+          </div>
+
+          <!-- Input dynamique Salle ou Lien Visio selon le format -->
+          <div *ngIf="formFormat() === 'Présentiel'">
+            <label class="block text-sm font-semibold text-slate-800 mb-1.5">Salle</label>
+            <input type="text" [(ngModel)]="formSalle" placeholder="Ex : Bureau B204 — IIT"
+              class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-sm bg-white focus:ring-2 focus:ring-[#1d4b99]/30 focus:border-[#1d4b99] outline-none transition-all" />
+          </div>
+
+          <div *ngIf="formFormat() === 'Visio'">
+            <label class="block text-sm font-semibold text-slate-800 mb-1.5">Lien de visioconférence</label>
+            <input type="url" [(ngModel)]="formLienVisio" placeholder="Ex : https://meet.google.com/abc-defg-hij"
+              class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-sm bg-white focus:ring-2 focus:ring-[#1d4b99]/30 focus:border-[#1d4b99] outline-none transition-all" />
+          </div>
+        </div>
+
+        <!-- Modal Footer -->
+        <div class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex justify-end gap-3 shrink-0">
+          <button (click)="closePlanifierModal()"
+            class="px-5 py-2.5 border border-slate-300 rounded-xl text-sm font-semibold text-slate-700 bg-white hover:bg-slate-50 transition-colors shadow-sm">
+            Annuler
+          </button>
+          <button (click)="validerPlanification()"
+            class="px-6 py-2.5 bg-[#1d4b99] hover:bg-[#153c80] text-white rounded-xl text-sm font-bold transition-all shadow-md hover:shadow-lg">
+            Planifier
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Mener l'Entretien / Consultation Compte-rendu -->
+  <div *ngIf="isMenerModalOpen()">
+    <div (click)="closeMenerModal()" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50" [@fadeIn]></div>
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div class="w-full max-w-xl bg-white rounded-2xl shadow-xl overflow-hidden flex flex-col max-h-[90vh]"
+        [@modalSlide]>
+
+        <!-- Modal Header -->
+        <div class="px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50 shrink-0">
+          <div>
+            <div class="flex items-center gap-2">
+              <h3 class="text-lg font-bold text-slate-900">
+                {{ isReadOnly() ? 'Compte-rendu d\'entretien' : 'Entretien d\'orientation' }} : {{
+                entretienEnCours()?.candidatNom }}
+              </h3>
+            </div>
+            <p class="text-xs text-slate-500 mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5">
+              <span>{{ entretienEnCours()?.date }} à {{ entretienEnCours()?.heure }}</span>
+              <span>•</span>
+              <span>{{ entretienEnCours()?.salleOuLien }}</span>
+            </p>
+          </div>
+          <button (click)="closeMenerModal()"
+            class="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-200 transition-colors">
+            <lucide-icon name="x" class="w-5 h-5"></lucide-icon>
+          </button>
+        </div>
+
+        <!-- Modal Body -->
+        <div class="p-6 overflow-y-auto space-y-5">
+
+          <!-- Avis de l'enseignant -->
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-2 uppercase">Avis de l'enseignant</label>
+
+            <!-- Mode Lecture Seule (Compte-rendu) -->
+            <div *ngIf="isReadOnly()">
+              <span class="inline-flex items-center px-4 py-2 rounded-xl text-sm font-bold border" [ngClass]="{
+                  'bg-emerald-50 text-emerald-700 border-emerald-200': formAvis() === 'Favorable',
+                  'bg-red-50 text-red-700 border-red-200': formAvis() === 'Défavorable'
+                }">
+                <lucide-icon [name]="formAvis() === 'Favorable' ? 'check-circle' : 'alert-circle'"
+                  class="w-4 h-4 mr-2"></lucide-icon>
+                {{ formAvis() }}
+              </span>
+            </div>
+
+            <!-- Mode Édition (Mener l'entretien en cours) -->
+            <div *ngIf="!isReadOnly()" class="grid grid-cols-2 gap-2">
+              <button type="button" (click)="formAvis.set('Favorable')"
+                [class]="formAvis() === 'Favorable' ? 'bg-emerald-600 text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'"
+                class="py-2.5 px-3 rounded-lg text-xs font-medium transition-colors text-center border"
+                [class.border-emerald-600]="formAvis() === 'Favorable'"
+                [class.border-slate-200]="formAvis() !== 'Favorable'">
+                Favorable
+              </button>
+              <button type="button" (click)="formAvis.set('Défavorable')"
+                [class]="formAvis() === 'Défavorable' ? 'bg-red-600 text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'"
+                class="py-2.5 px-3 rounded-lg text-xs font-medium transition-colors text-center border"
+                [class.border-red-600]="formAvis() === 'Défavorable'"
+                [class.border-slate-200]="formAvis() !== 'Défavorable'">
+                Défavorable
+              </button>
+            </div>
+          </div>
+
+          <!-- Orientation finale -->
+          <!-- <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1.5 uppercase">Orientation finale validée</label>
+            
+            <div *ngIf="isReadOnly()" class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-800 flex items-center gap-2">
+              <lucide-icon name="check-circle" class="w-4 h-4 text-emerald-600 shrink-0"></lucide-icon>
+              <span>{{ formOrientationFinale || 'Non spécifiée' }}</span>
+            </div>
+
+            <input *ngIf="!isReadOnly()" type="text" [(ngModel)]="formOrientationFinale"
+              class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-[#1d4b99] outline-none" />
+          </div> -->
+
+          <!-- Notes d'entretien -->
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1.5 uppercase">Notes & observations de
+              l'entretien</label>
+
+            <div *ngIf="isReadOnly()"
+              class="p-3.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 leading-relaxed whitespace-pre-line min-h-[90px]">
+              {{ formNotes || 'Aucune observation enregistrée.' }}
+            </div>
+
+            <textarea *ngIf="!isReadOnly()" [(ngModel)]="formNotes" rows="4"
+              placeholder="Ex: Excellente motivation, profil adapté pour le cycle d'ingénierie, bases solides en algorithmique..."
+              class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-[#1d4b99] outline-none resize-none"></textarea>
+          </div>
+
+        </div>
+
+        <!-- Modal Footer -->
+        <div class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex justify-end gap-3 shrink-0">
+          <button (click)="closeMenerModal()"
+            class="px-5 py-2.5 border border-slate-300 rounded-xl text-sm font-semibold text-slate-700 bg-white hover:bg-slate-100 transition-colors shadow-sm">
+            Fermer
+          </button>
+          <button *ngIf="!isReadOnly()" (click)="validerFinEntretien()"
+            class="px-5 py-2.5 bg-[#1d4b99] hover:bg-[#153c80] text-white rounded-xl text-sm font-bold transition-all shadow-md hover:shadow-lg">
+            Enregistrer 
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div>

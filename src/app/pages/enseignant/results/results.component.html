@@ -1,0 +1,317 @@
+<div class="space-y-6 relative font-sans">
+  <!-- Header (Style Profils Candidats) -->
+  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <div>
+      <div class="flex items-center gap-2.5">
+        <h1 class="text-2xl font-bold text-slate-900">Résultats QCM</h1>
+      
+      </div>
+      <p class="text-slate-500 text-sm mt-1">
+        Consultez le score QCM de chaque candidat {{ teacherUni() }} ainsi que ses réponses détaillées avec correction.
+      </p>
+    </div>
+  </div>
+
+  <!-- Search & Filters (Style Profils Candidats) -->
+  <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-col lg:flex-row gap-4">
+    <div class="relative flex-1">
+      <lucide-icon name="search"
+        class="w-5 h-5 absolute left-2 top-1/2 transform -translate-y-1/2 text-slate-400"></lucide-icon>
+      <input type="text" placeholder="Rechercher par candidat, email, filière, baccalauréat..."
+        [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event); currentPage.set(1)"
+        [style.paddingLeft]="'3rem'"
+        class="w-full pr-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-[#1d4b99] focus:border-[#1d4b99] outline-none" />
+    </div>
+
+    <div class="relative">
+      <button (click)="toggleFilter()"
+        class="flex items-center space-x-2 px-4 py-2 border border-slate-300 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors">
+        <lucide-icon name="filter" class="w-4 h-4"></lucide-icon>
+        <span>Filtrer</span>
+        <lucide-icon name="chevron-down" class="w-4 h-4"></lucide-icon>
+      </button>
+
+      <!-- Filter Dropdown -->
+      <div *ngIf="isFilterOpen()"
+        class="absolute right-0 top-full mt-2 w-72 bg-white rounded-xl shadow-lg border border-slate-200 p-4 z-50 space-y-4">
+        <div>
+          <label class="block text-xs font-medium text-slate-700 mb-1.5 uppercase">Tranche de score</label>
+          <select [ngModel]="scoreFilter()" (ngModelChange)="scoreFilter.set($event); currentPage.set(1)"
+            class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-[#1d4b99] outline-none">
+            <option value="">Tous les scores</option>
+            <option value="haut">Réussi (&ge; 50%)</option>
+            <option value="moyen">Moyen (20% - 49%)</option>
+            <option value="bas">Insuffisant (&lt; 20%)</option>
+          </select>
+        </div>
+        <button (click)="clearFilters()"
+          class="w-full px-3 py-2 text-sm text-slate-600 hover:text-slate-900 border-t border-slate-100 pt-3">
+          Réinitialiser les filtres
+        </button>
+      </div>
+      <!-- Overlay to close filter -->
+      <div *ngIf="isFilterOpen()" (click)="toggleFilter()" class="fixed inset-0 z-40 bg-transparent"></div>
+    </div>
+  </div>
+
+  <!-- Table Candidats + Score QCM (Style Profils Candidats) -->
+  <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm text-left">
+        <thead class="text-xs text-slate-500 uppercase bg-slate-50 border-b border-slate-200">
+          <tr>
+            <th class="px-6 py-4 font-medium">Candidat</th>
+            <!-- <th class="px-6 py-4 font-medium">Parcours souhaité</th> -->
+            <th class="px-6 py-4 font-medium">Score QCM</th>
+            <th *ngFor="let m of modules()" class="px-4 py-4 font-medium text-center whitespace-nowrap">{{ m.label }}</th>
+            <th class="px-6 py-4 font-medium">Niveau</th>
+            <th class="px-6 py-4 font-medium ">Date de passation</th>
+            <th class="px-6 py-4 font-medium text-center">Action</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          <tr *ngFor="let c of paginatedCandidats()" class="hover:bg-slate-50 transition-colors">
+
+            <!-- Candidat avec Avatar et Initiales (identique à Profils Candidats) -->
+            <td class="px-6 py-4">
+              <div class="flex items-center space-x-3">
+                <div
+                  class="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center text-[#1d4b99] font-bold text-xs border border-slate-200 shrink-0">
+                  {{ c.nom.substring(0, 2).toUpperCase() }}
+                </div>
+                <div>
+                  <div class="font-medium text-slate-900">{{ c.nom }}</div>
+                  <div class="text-slate-500 text-xs">{{ c.email }} </div>
+                </div>
+              </div>
+            </td>
+
+
+            <!-- Score QCM (Barre horizontale + Pourcentage identique à Profils Candidats) -->
+            <td class="px-6 py-4">
+              <div *ngIf="c.qcmPasse" class="flex items-center space-x-3">
+                <div class="w-20 bg-slate-100 rounded-full h-2.5 overflow-hidden shrink-0">
+                  <div class="h-full rounded-full transition-all duration-300" [style.width.%]="c.scoreQcm || 0"
+                    [ngClass]="getScoreColorClass(c.scoreQcm).bar">
+                  </div>
+                </div>
+                <span class="font-bold text-slate-800 text-sm min-w-[34px]">{{ c.scoreQcm }}%</span>
+              </div>
+              <div *ngIf="!c.qcmPasse">
+                <span class="inline-flex items-center text-xs text-slate-400 italic">
+                  <lucide-icon name="clock" class="w-3.5 h-3.5 mr-1 text-slate-400"></lucide-icon>
+                  En attente
+                </span>
+              </div>
+            </td>
+
+            <!-- Notes par module (texte simple sur les 5 questions) -->
+            <td *ngFor="let m of modules()" class="px-4 py-4 text-center whitespace-nowrap text-xs font-medium text-slate-700">
+              {{ getModuleScoreText(c, m.key) }}
+            </td>
+
+            <!-- Niveau -->
+            <td class="px-6 py-4">
+              <span *ngIf="c.qcmPasse"
+                class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border"
+                [ngClass]="getScoreColorClass(c.scoreQcm).badge">
+                {{ getNiveauLabel(c.scoreQcm) }}
+              </span>
+              <span *ngIf="!c.qcmPasse"
+                class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-500 border border-slate-200">
+                Non passé
+              </span>
+            </td>
+
+            <!-- Date -->
+            <td class="px-6 py-4 whitespace-nowrap text-xs text-slate-600 font-medium">
+              {{ c.dateQcm || c.dateInscription }}
+            </td>
+
+            <!-- Action : Voir QCM & Correction -->
+            <td class="px-6 py-4 text-center">
+              <button *ngIf="c.qcmPasse" (click)="openQcmModal(c)" title="Voir QCM & Correction"
+                class="p-2 text-[#1d4b99] hover:bg-blue-50 rounded-lg transition-colors">
+                <lucide-icon name="eye" class="w-4 h-4"></lucide-icon>
+              </button>
+              <span *ngIf="!c.qcmPasse" class="text-xs text-slate-400 italic">
+                Aucune réponse
+              </span>
+            </td>
+
+          </tr>
+          <tr *ngIf="paginatedCandidats().length === 0">
+            <td [attr.colspan]="modules().length + 5" class="px-6 py-12 text-center text-slate-500 italic bg-slate-50/50">
+              Aucun résultat trouvé avec ces critères de recherche.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination (Style Profils Candidats) -->
+    <div
+      class="p-4 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-slate-500 bg-slate-50/50">
+      <span>Affichage de {{ filteredCount() > 0 ? startIndex() + 1 : 0 }} à {{ endIndex() }} sur {{ filteredCount() }} candidats</span>
+      <div class="flex items-center gap-1">
+        <button (click)="prevPage()" [disabled]="currentPage() === 1"
+          class="px-2 py-1 border border-slate-300 rounded-md bg-white disabled:opacity-50">&lt;</button>
+        <div class="flex gap-1">
+          <button *ngFor="let p of pageNumbers()" (click)="goToPage(p)"
+            class="w-8 h-8 rounded-md transition-all font-medium" [class.bg-[#1d4b99]]="currentPage() === p"
+            [class.text-white]="currentPage() === p" [class.hover:bg-slate-200]="currentPage() !== p">{{ p }}</button>
+        </div>
+        <button (click)="nextPage()" [disabled]="currentPage() === totalPages()"
+          class="px-2 py-1 border border-slate-300 rounded-md bg-white disabled:opacity-50">&gt;</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Détail QCM & Correction de l'étudiant -->
+  <div *ngIf="selectedCandidat()">
+    <div (click)="closeQcmModal()" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50" [@fadeIn]></div>
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div class="w-full max-w-4xl bg-white rounded-2xl shadow-xl overflow-hidden flex flex-col max-h-[90vh]"
+        [@modalSlide]>
+
+        <!-- Modal Header -->
+        <div class="px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50 shrink-0">
+          <div class="flex items-center gap-3">
+            <div
+              class="w-10 h-10 rounded-full bg-[#1d4b99]/10 text-[#1d4b99] font-bold text-sm flex items-center justify-center border border-[#1d4b99]/20">
+              {{ selectedCandidat()?.nom?.substring(0, 2)?.toUpperCase() }}
+            </div>
+            <div>
+              <div class="flex items-center gap-2.5 flex-wrap">
+                <h3 class="text-lg font-bold text-slate-900">
+                  QCM &amp; Correction : {{ selectedCandidat()?.nom }}
+                </h3>
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold border"
+                  [ngClass]="getScoreColorClass(selectedCandidat()?.scoreQcm).badge">
+                  Score : {{ selectedCandidat()?.scoreQcm }}%
+                </span>
+              
+              </div>
+            </div>
+          </div>
+
+          <button (click)="closeQcmModal()"
+            class="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-200 transition-colors">
+            <lucide-icon name="x" class="w-5 h-5"></lucide-icon>
+          </button>
+        </div>
+
+        <!-- Modal Body: Liste des questions avec réponse de l'étudiant et correction -->
+        <div class="p-6 overflow-y-auto space-y-5 bg-slate-50/40">
+
+       
+          <!-- Questions Loop -->
+          <div *ngFor="let q of modalQuestions(); let qIdx = index"
+            class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-4">
+
+            <!-- Question Header -->
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="px-2.5 py-1 rounded-lg text-xs font-bold bg-[#1d4b99]/10 text-[#1d4b99]">
+                  Question {{ qIdx + 1 }}
+                </span>
+                <span class="px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-100 text-slate-700">
+                  {{ q.domaine }}
+                </span>
+                <span class="px-2.5 py-1 rounded-lg text-xs font-medium bg-amber-50 text-amber-800 border border-amber-200">
+                  {{ q.difficulte }}
+                </span>
+              </div>
+
+              <!-- Résultat de la question -->
+              <div>
+                <span *ngIf="isQuestionCorrect(selectedCandidat(), q)"
+                  class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                  <lucide-icon name="check-circle" class="w-3.5 h-3.5"></lucide-icon>
+                  Réponse correcte
+                </span>
+                <span *ngIf="!isQuestionCorrect(selectedCandidat(), q)"
+                  class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-red-50 text-red-700 border border-red-200">
+                  <lucide-icon name="x-circle" class="w-3.5 h-3.5"></lucide-icon>
+                  Réponse incorrecte
+                </span>
+              </div>
+            </div>
+
+            <!-- Question Text -->
+            <h4 class="text-sm font-bold text-slate-900 leading-snug">
+              {{ q.question }}
+            </h4>
+
+            <!-- Options avec indication de la réponse choisie par l'étudiant et de la bonne réponse -->
+            <div class="space-y-2">
+              <div *ngFor="let opt of q.options; let optIdx = index"
+                class="p-3 rounded-xl border text-xs flex items-center justify-between gap-3 transition-colors"
+                [ngClass]="{
+                  'bg-emerald-50 border-emerald-300 text-emerald-900 font-semibold': optIdx === q.bonneReponseIndex,
+                  'bg-red-50 border-red-300 text-red-900 font-semibold': optIdx === getStudentAnswerForQuestion(selectedCandidat(), q.id) && optIdx !== q.bonneReponseIndex,
+                  'bg-white border-slate-200 text-slate-600': optIdx !== q.bonneReponseIndex && optIdx !== getStudentAnswerForQuestion(selectedCandidat(), q.id)
+                }">
+
+                <div class="flex items-center gap-3">
+                  <span class="w-6 h-6 rounded-md text-[11px] font-bold flex items-center justify-center shrink-0"
+                    [ngClass]="{
+                      'bg-emerald-600 text-white': optIdx === q.bonneReponseIndex,
+                      'bg-red-600 text-white': optIdx === getStudentAnswerForQuestion(selectedCandidat(), q.id) && optIdx !== q.bonneReponseIndex,
+                      'bg-slate-100 text-slate-600': optIdx !== q.bonneReponseIndex && optIdx !== getStudentAnswerForQuestion(selectedCandidat(), q.id)
+                    }">
+                    {{ optionLetters[optIdx] }}
+                  </span>
+                  <span>{{ opt }}</span>
+                </div>
+
+                <!-- Tags droite -->
+                <div class="flex items-center gap-2 shrink-0">
+                  <span *ngIf="optIdx === getStudentAnswerForQuestion(selectedCandidat(), q.id) && optIdx === q.bonneReponseIndex"
+                    class="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700">
+                    <lucide-icon name="check-circle" class="w-3.5 h-3.5"></lucide-icon>
+                    Réponse étudiant (Correcte)
+                  </span>
+
+                  <span *ngIf="optIdx === getStudentAnswerForQuestion(selectedCandidat(), q.id) && optIdx !== q.bonneReponseIndex"
+                    class="inline-flex items-center gap-1 text-[11px] font-bold text-red-700">
+                    <lucide-icon name="x-circle" class="w-3.5 h-3.5"></lucide-icon>
+                    Réponse étudiant
+                  </span>
+
+                  <span *ngIf="optIdx === q.bonneReponseIndex && optIdx !== getStudentAnswerForQuestion(selectedCandidat(), q.id)"
+                    class="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700">
+                    <lucide-icon name="check-circle" class="w-3.5 h-3.5"></lucide-icon>
+                    Bonne réponse
+                  </span>
+                </div>
+
+              </div>
+            </div>
+
+            <!-- Explication / Correction pédagogique -->
+            <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-start gap-2.5 text-xs text-slate-700">
+              <lucide-icon name="info" class="w-4 h-4 text-[#1d4b99] shrink-0 mt-0.5"></lucide-icon>
+              <div>
+                <span class="font-bold text-slate-900">Correction : </span>
+                <span>{{ q.explication }}</span>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- Modal Footer -->
+        <div class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex justify-end shrink-0">
+          <button (click)="closeQcmModal()"
+            class="px-5 py-2 border border-slate-300 rounded-lg text-sm font-medium text-slate-700 bg-white hover:bg-slate-100 transition-colors">
+            Fermer
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+

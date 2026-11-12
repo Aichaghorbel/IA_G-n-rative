@@ -302,16 +302,23 @@ export class RegisterComponent {
     this.showKnownByDropdown.set(false);
   }
 
-  async handleSubmit(e: Event) {
-    e.preventDefault();
-    if (!this.validateStep()) return;
+  async handleSubmit(e?: Event) {
+    if (e) e.preventDefault();
+    if (!this.formData.firstName || !this.formData.lastName || !this.formData.email || !this.formData.password) {
+      this.error.set('Veuillez renseigner votre Nom, Prénom, Email et Mot de passe.');
+      return;
+    }
 
     this.isSubmitting.set(true);
     try {
-      await this.authService.register(this.formData);
-      this.step.set(5);
-    } catch (err) {
-      this.error.set("Une erreur est survenue lors de l'inscription.");
+      await this.authService.register({
+        ...this.formData,
+        role: 'student'
+      });
+      // Redirection immédiate vers le tableau de bord candidat
+      this.router.navigate(['/student/dashboard']);
+    } catch (err: any) {
+      this.error.set(err?.message || "Une erreur est survenue lors de l'inscription.");
     } finally {
       this.isSubmitting.set(false);
     }
