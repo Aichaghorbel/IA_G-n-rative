@@ -1,0 +1,21 @@
+# IIT — CONDITIONS D'ADMISSION ET PROCÉDURES DE PRÉINSCRIPTION 2026-2027
+
+1. CONDITIONS D'ÉLIGIBILITÉ
+- Cycle Préparatoire Intégré (2 ans) :
+  Ouvert aux bacheliers des sections Mathématiques, Sciences Expérimentales, Informatique et Technique.
+  Sélection sur dossier scolaire et entretien de motivation avec un enseignant responsable.
+
+- Licence Informatique (3 ans) :
+  Ouverte aux bacheliers de toutes sections ayant un intérêt démontré pour les technologies numériques.
+
+- Cycle Ingénieur (3 ans - Spécialisation) :
+  * Bacheliers ayant complété les 2 ans de prépa intégrée à l'IIT.
+  * Titulaires d'un diplôme de Licence en Informatique, Mathématiques appliquées ou Génie Électrique.
+  * Candidats reçus aux concours nationaux d'entrée aux cycles de formation d'ingénieurs.
+
+2. ÉTAPES DU PROCESSUS D'ADMISSION
+- Étape 1 : Dialogue et découverte via SmartCampus AI (texte ou message vocal en tunisien/français).
+- Étape 2 : Préinscription en ligne avec consentement RGPD explicite et vérification de l'adresse email par code OTP.
+- Étape 3 : QCM adaptatif d'évaluation des compétences logiques et motivations.
+- Étape 4 : Entretien individuel avec l'enseignant responsable affecté (en présentiel sur le campus ou en visioconférence).
+- Étape 5 : Décision d'admission finale et création du compte candidat définitif.

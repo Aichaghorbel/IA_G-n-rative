@@ -1,0 +1,73 @@
+# Policies Casbin SmartCampus AI
+# Rôles complets : Visiteur, Candidat, Enseignant, Administrateur
+
+# --- Visiteur ---
+p, Visiteur, /api/v1/auth/sessions/anonymous, POST
+p, Visiteur, /api/v1/auth/otp/request, POST
+p, Visiteur, /api/v1/auth/otp/verify, POST
+p, Visiteur, /api/v1/conversations, POST
+p, Visiteur, /api/v1/conversations, GET
+p, Visiteur, /api/v1/conversations/*, GET
+p, Visiteur, /api/v1/conversations/*/messages, POST
+p, Visiteur, /api/v1/conversations/*/messages, GET
+p, Visiteur, /api/v1/conversations/*/audio, POST
+p, Visiteur, /api/v1/conversations/*/memory, GET
+p, Visiteur, /api/v1/conversations/*, DELETE
+p, Visiteur, /api/v1/conversations/*/messages/*/audio, GET
+p, Visiteur, /api/v1/conversations/*/audio-preference, POST
+p, Visiteur, /api/v1/conversations/*/messages/*/stream, GET
+p, Visiteur, /api/v1/preregistrations, POST
+p, Visiteur, /api/v1/preregistrations/*, GET
+p, Visiteur, /api/v1/preregistrations/*, PATCH
+p, Visiteur, /api/v1/qcm, POST
+p, Visiteur, /api/v1/qcm/*, GET
+p, Visiteur, /api/v1/qcm/*/answers, POST
+
+# --- Candidat hérite de Visiteur et a ses propres routes ---
+p, Candidat, /api/v1/me, GET
+p, Candidat, /api/v1/candidates/me, GET
+p, Candidat, /api/v1/candidates/me/profile, PATCH
+p, Candidat, /api/v1/candidates/*/assignment, GET
+p, Candidat, /api/v1/recommendations/me, GET
+p, Candidat, /api/v1/recommendations/*, GET
+p, Candidat, /api/v1/recommendations/*/accept, POST
+p, Candidat, /api/v1/recommendations/*/reject, POST
+p, Candidat, /api/v1/qcm/*/result, GET
+p, Candidat, /api/v1/appointments/slots, GET
+p, Candidat, /api/v1/appointments, POST
+p, Candidat, /api/v1/appointments/me, GET
+p, Candidat, /api/v1/appointments/*, PATCH
+p, Candidat, /api/v1/notifications, GET
+p, Candidat, /api/v1/notifications/*/read, PATCH
+p, Candidat, /api/v1/auth/refresh, POST
+p, Candidat, /api/v1/auth/logout, POST
+
+# --- Enseignant ---
+p, Enseignant, /api/v1/me, GET
+p, Enseignant, /api/v1/candidates, GET
+p, Enseignant, /api/v1/candidates/*, GET
+p, Enseignant, /api/v1/candidates/*/summary, GET
+p, Enseignant, /api/v1/candidates/*/assignment, GET
+p, Enseignant, /api/v1/preregistrations/*, GET
+p, Enseignant, /api/v1/preregistrations/*/decision, POST
+p, Enseignant, /api/v1/conversations/*/messages, GET
+p, Enseignant, /api/v1/conversations/*/memory, GET
+p, Enseignant, /api/v1/recommendations/*, GET
+p, Enseignant, /api/v1/recommendations/*, PATCH
+p, Enseignant, /api/v1/qcm/*/result, GET
+p, Enseignant, /api/v1/appointments/slots, GET
+p, Enseignant, /api/v1/appointments, GET
+p, Enseignant, /api/v1/appointments, POST
+p, Enseignant, /api/v1/appointments/*, PATCH
+p, Enseignant, /api/v1/appointments/*/outcome, POST
+p, Enseignant, /api/v1/notifications, GET
+p, Enseignant, /api/v1/notifications/*/read, PATCH
+p, Enseignant, /api/v1/stats/qcm, GET
+p, Enseignant, /api/v1/auth/refresh, POST
+p, Enseignant, /api/v1/auth/logout, POST
+
+# --- Administrateur unifié : Accès complet ---
+p, Administrateur, /api/v1/*, (GET)|(POST)|(PATCH)|(PUT)|(DELETE)
+
+# Héritage de rôles : Candidat hérite des permissions de Visiteur
+g, Candidat, Visiteur
