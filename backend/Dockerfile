@@ -2,22 +2,17 @@ FROM python:3.12-slim
 
 WORKDIR /app
 
-# Install system dependencies (build-essential, libmagic, libpq)
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
-    libpq-dev \
-    curl \
-    && rm -rf /var/lib/apt/lists/*
-
-# Copy requirements and install
+# Les dépendances Python (psycopg2-binary, bcrypt, uvicorn...) disposent de wheels pré-compilés
+# Aucun compilateur C ni libpq système n'est requis
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
 
-# Copy source code
+# Copie du code source backend
 COPY . .
 
-# Expose FastAPI port
+# Exposition du port FastAPI
 EXPOSE 8000
 
-# Run uvicorn
+# Commande de démarrage par défaut
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]

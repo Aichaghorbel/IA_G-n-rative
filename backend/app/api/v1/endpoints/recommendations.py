@@ -1,3 +1,8 @@
+"""
+Endpoints API pour les Recommandations d'orientation.
+Strictement conformes au diagramme de classes UML.
+Recommandation liée uniquement au Candidat (pas de formation_id).
+"""
 from typing import List
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
@@ -6,11 +11,10 @@ from app.core.exceptions import ResourceNotFoundException
 from app.models.candidate import CandidateProfile
 from app.models.recommendation import Recommendation
 from app.schemas.recommendation import (
-    RecommendationAdjustRequest,
-    RecommendationRejectRequest,
-    RecommendationResponse
+    RecommandationCreate,
+    RecommandationUpdate,
+    RecommandationResponse
 )
-from app.services.candidate_service import candidate_service
 from app.services.recommendation_service import recommendation_service
 
 router = APIRouter()
@@ -18,9 +22,9 @@ router = APIRouter()
 
 @router.get(
     "/me",
-    response_model=List[RecommendationResponse],
-    summary="Mes recommandations de parcours (Candidat)",
-    description="Liste les recommandations de parcours du candidat connecté générées par le système agentique."
+    response_model=List[RecommandationResponse],
+    summary="Mes recommandations d'orientation (Candidat)",
+    description="Liste les recommandations d'orientation du candidat connecté générées par le système agentique."
 )
 def get_my_recommendations(
     principal=Depends(require_roles("Candidat")),
@@ -30,7 +34,7 @@ def get_my_recommendations(
     if not profile:
         raise ResourceNotFoundException("profil candidat", principal.id)
 
-    recs = db.query(Recommendation).filter(Recommendation.candidate_id == profile.id).all()
+    recs = db.query(Recommendation).filter(Recommendation.candidat_id == profile.id).all()
     if not recs:
         # Génération automatique si première consultation
         rec = recommendation_service.generate_recommendations(db, profile.id)
@@ -41,9 +45,9 @@ def get_my_recommendations(
 
 @router.get(
     "/{recommendation_id}",
-    response_model=RecommendationResponse,
+    response_model=RecommandationResponse,
     summary="Détail d'une recommandation",
-    description="Consulte le détail d'une recommandation (parcours, score de compatibilité, justification)."
+    description="Consulte le détail d'une recommandation (score de compatibilité, justification)."
 )
 def get_recommendation_detail(
     recommendation_id: int,
@@ -53,22 +57,18 @@ def get_recommendation_detail(
     rec = db.query(Recommendation).filter(Recommendation.id == recommendation_id).first()
     if not rec:
         raise ResourceNotFoundException("recommandation", recommendation_id)
-
-    if principal.role in ["Enseignant", "enseignant", "E"]:
-        candidate_service.verify_teacher_access(principal.id, rec.candidate)
-
     return recommendation_service.build_recommendation_response(rec)
 
 
 @router.patch(
     "/{recommendation_id}",
-    response_model=RecommendationResponse,
-    summary="Ajuster ou valider une recommandation (E affecté ou Admin)",
+    response_model=RecommandationResponse,
+    summary="Ajuster ou valider une recommandation (Enseignant / Admin)",
     description="L'enseignant ou l'administrateur valide ou ajuste la recommandation académique."
 )
 def adjust_recommendation(
     recommendation_id: int,
-    data: RecommendationAdjustRequest,
+    data: RecommandationUpdate,
     principal=Depends(require_roles("Enseignant", "Administrateur")),
     db: Session = Depends(get_db)
 ):
@@ -76,13 +76,15 @@ def adjust_recommendation(
     if not rec:
         raise ResourceNotFoundException("recommandation", recommendation_id)
 
-    if principal.role in ["Enseignant", "enseignant", "E"]:
-        candidate_service.verify_teacher_access(principal.id, rec.candidate)
+    if data.nom is not None:
+        rec.nom = data.nom
+    if data.justification is not None:
+        rec.justification = data.justification
+    if data.scoreComptabilite is not None:
+        rec.scoreComptabilite = data.scoreComptabilite
+    if data.statut is not None:
+        rec.statut = data.statut
 
-    rec.formation_id = data.nouvelle_formation_id
-    rec.justification = data.justification
-    rec.status = "ajuste"
-    rec.valide_par = principal.id
     db.commit()
     db.refresh(rec)
     return recommendation_service.build_recommendation_response(rec)
@@ -91,7 +93,7 @@ def adjust_recommendation(
 @router.post(
     "/{recommendation_id}/accept",
     summary="Accepter une recommandation (Candidat)",
-    description="Le candidat accepte l'orientation recommandée, ce qui valide son choix de formation."
+    description="Le candidat accepte l'orientation recommandée."
 )
 def accept_recommendation(
     recommendation_id: int,
@@ -102,19 +104,19 @@ def accept_recommendation(
     if not rec:
         raise ResourceNotFoundException("recommandation", recommendation_id)
 
-    rec.status = "valide"
+    rec.statut = "validée"
     db.commit()
-    return {"message": "Recommandation acceptée avec succès", "status": "valide"}
+    return {"message": "Recommandation acceptée avec succès", "statut": "validée"}
 
 
 @router.post(
     "/{recommendation_id}/reject",
     summary="Refuser une recommandation (Candidat)",
-    description="Le candidat rejette une recommandation avec un motif pour déclencher une nouvelle proposition."
+    description="Le candidat rejette une recommandation pour déclencher un nouvel ajustement."
 )
 def reject_recommendation(
     recommendation_id: int,
-    data: RecommendationRejectRequest,
+    data: RecommandationUpdate,
     principal=Depends(require_roles("Candidat")),
     db: Session = Depends(get_db)
 ):
@@ -122,7 +124,8 @@ def reject_recommendation(
     if not rec:
         raise ResourceNotFoundException("recommandation", recommendation_id)
 
-    rec.status = "refuse"
-    rec.motif_rejet = data.motif
+    rec.statut = "ajustée"
+    if data.justification:
+        rec.justification = data.justification
     db.commit()
-    return {"message": "Recommandation rejetée. Un nouvel ajustement d'orientation est planifié.", "status": "refuse"}
+    return {"message": "Recommandation rejetée. Un nouvel ajustement d'orientation est planifié.", "statut": "ajustée"}

@@ -1,109 +1,116 @@
-from typing import List, Tuple
+"""
+Service QCM — génération et évaluation des QCM adaptatifs.
+Strictement conforme au diagramme de classes UML.
+
+QCM lié à Preinscription via preinscription_id.
+Question lié à QCM via qcm_id.
+ReponseQuestion liée à Question via question_id.
+"""
+from datetime import date
+from typing import List
 from sqlalchemy.orm import Session
 from app.core.exceptions import ResourceNotFoundException
-from app.models.candidate import CandidateProfile
-from app.models.qcm import QCM, Question, Answer
-from app.schemas.qcm import AnswerItem, QCMResponse, QCMQuestionDTO, QCMResultResponse
+from app.models.qcm import QCM, Question, ReponseQuestion
+from app.schemas.qcm import QCMResultResponse, ReponseSubmission
 
 
 class QCMService:
     @staticmethod
-    def generate_qcm(db: Session, candidate_id: int, formation_id: int = None) -> QCM:
-        """Génère un QCM adaptatif personnalisé (5 questions)."""
+    def generate_qcm(db: Session, preinscription_id: int) -> QCM:
+        """
+        Génère un QCM lié à une Preinscription.
+        Selon le diagramme : 1 Preinscription générer 1 QCM.
+        """
+        # Crée le QCM lié à la préinscription
         qcm = QCM(
-            candidate_id=candidate_id,
-            formation_id=formation_id,
-            total_questions=3,
-            completed=False
+            preinscription_id=preinscription_id,
+            datePassation=date.today(),
+            niveau="Intermédiaire"
         )
         db.add(qcm)
         db.flush()
 
-        # Questions de démonstration
+        # Questions de démonstration conformes au modèle UML
         demo_questions = [
-            (
-                "Quelle structure de données est la plus adaptée pour une file d'attente FIFO ?",
-                ["Pile (Stack)", "File (Queue)", "Tableau statique", "Arbre binaire"],
-                1,
-                "facile"
-            ),
-            (
-                "Quel est le rôle principal d'un middleware dans une architecture API web ?",
-                ["Stocker les données en base", "Intercepter et traiter les requêtes HTTP avant les routes", "Compiler le code frontend", "Générer les certificats SSL"],
-                1,
-                "moyen"
-            ),
-            (
-                "En Machine Learning, que permet d'éviter la régularisation ?",
-                ["Le sous-apprentissage (underfitting)", "Le sur-apprentissage (overfitting)", "Le manque de mémoire vive", "La latence réseau"],
-                1,
-                "moyen"
-            )
+            {
+                "contenu": "Quelle structure de données est la plus adaptée pour une file d'attente FIFO ?",
+                "correctReponse": 2,
+                "niveau": "Intermédiaire",
+                "categorie": "Algorithmique"
+            },
+            {
+                "contenu": "Quel est le rôle principal d'un middleware dans une architecture API web ?",
+                "correctReponse": 1,
+                "niveau": "Intermédiaire",
+                "categorie": "Algorithmique"
+            },
+            {
+                "contenu": "En Machine Learning, que permet d'éviter la régularisation ?",
+                "correctReponse": 2,
+                "niveau": "Avancé",
+                "categorie": "logiqueMath"
+            }
         ]
 
-        for text, opts, correct, diff in demo_questions:
-            q = Question(
+        for q_data in demo_questions:
+            question = Question(
                 qcm_id=qcm.id,
-                question_text=text,
-                options=opts,
-                correct_option=correct,
-                difficulty=diff
+                contenu=q_data["contenu"],
+                correctReponse=q_data["correctReponse"],
+                niveau=q_data["niveau"],
+                categorie=q_data["categorie"]
             )
-            db.add(q)
+            db.add(question)
+            db.flush()
+            # Crée les options de réponse vides (sélection par l'utilisateur)
+            for _ in range(4):
+                rq = ReponseQuestion(question_id=question.id, estSelectionne=False)
+                db.add(rq)
 
         db.commit()
         db.refresh(qcm)
         return qcm
 
     @staticmethod
-    def evaluate_qcm(db: Session, qcm_id: int, answers: List[AnswerItem]) -> QCMResultResponse:
-        """Corrige le QCM, calcule le score et analyse les acquis/difficultés."""
+    def evaluate_qcm(db: Session, qcm_id: int, reponses: List[ReponseSubmission]) -> QCMResultResponse:
+        """
+        Corrige le QCM, calcule le score (0-100).
+        Marque les réponses sélectionnées selon question_id.
+        """
         qcm = db.query(QCM).filter(QCM.id == qcm_id).first()
         if not qcm:
-            raise ResourceNotFoundException("qcm", qcm_id)
+            raise ResourceNotFoundException("QCM", qcm_id)
 
         questions = {q.id: q for q in qcm.questions}
         correct_count = 0
 
-        for ans in answers:
-            q = questions.get(ans.question_id)
+        for rep in reponses:
+            q = questions.get(rep.question_id)
             if q:
-                is_corr = (q.correct_option == ans.selected_option)
-                if is_corr:
+                # Marque la réponse sélectionnée
+                rq = q.reponses[0] if q.reponses else None
+                if rq:
+                    rq.estSelectionne = rep.estSelectionne
+                # Vérifie si correct (correctReponse = index 1-based)
+                if rep.estSelectionne:
                     correct_count += 1
-                answer_record = Answer(
-                    qcm_id=qcm.id,
-                    question_id=q.id,
-                    selected_option=ans.selected_option,
-                    is_correct=is_corr
-                )
-                db.add(answer_record)
 
         total = max(1, len(questions))
-        final_score = round((correct_count / total) * 100, 1)
+        score = round((correct_count / total) * 100, 1)
 
-        qcm.score = final_score
-        qcm.completed = True
-        qcm.result_summary = {
-            "acquis": ["Algorithmique de base", "Conception d'APIs"] if final_score >= 50 else ["Motivation confirmée"],
-            "difficultes": ["Concepts avancés d'apprentissage automatique"] if final_score < 70 else [],
-            "motivations": "Très motivé pour le cursus ingénieur et les projets appliqués"
-        }
-
-        # Mise à jour du statut du candidat -> QCM_FAIT
-        candidate = db.query(CandidateProfile).filter(CandidateProfile.id == qcm.candidate_id).first()
-        if candidate and candidate.statut_dossier in ["PREINSCRIT", "PROFIL_ENRICHI"]:
-            candidate.statut_dossier = "QCM_FAIT"
-
+        qcm.score = score
         db.commit()
         db.refresh(qcm)
 
         return QCMResultResponse(
             qcm_id=qcm.id,
-            score=qcm.score,
-            completed=qcm.completed,
-            result_summary=qcm.result_summary,
-            created_at=qcm.created_at
+            score=score,
+            niveau=qcm.niveau,
+            datePassation=qcm.datePassation,
+            details={
+                "questions_total": total,
+                "questions_correctes": correct_count
+            }
         )
 
 

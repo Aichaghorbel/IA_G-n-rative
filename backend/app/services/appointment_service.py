@@ -2,11 +2,9 @@ from datetime import datetime, timezone
 from typing import List, Optional
 from sqlalchemy.orm import Session
 from app.core.exceptions import ResourceNotFoundException
-from app.models.appointment import Appointment
+from app.models.appointment import Appointment, Entretien
 from app.models.candidate import CandidateProfile
 from app.models.user import User
-from app.services.auth_service import auth_service
-from app.services.candidate_service import candidate_service
 
 
 class AppointmentService:
@@ -19,39 +17,31 @@ class AppointmentService:
         current_teacher: User
     ) -> Appointment:
         """
-        Saisie du résultat et observations d'entretien (Section 3.7 & 6.8).
-        Déclenche la conversion automatique visiteur -> candidat si decision_finale == 'admis'.
+        Saisie du résultat d'entretien.
+        Crée un Entretien associé au RendezVous avec l'avis et les notes.
+        Selon le diagramme : Entretien est lié au RendezVous via rendezvous_id uniquement.
         """
         apt = db.query(Appointment).filter(Appointment.id == appointment_id).first()
         if not apt:
             raise ResourceNotFoundException("rendez-vous", appointment_id)
 
-        # Vérification d'affectation
-        candidate = db.query(CandidateProfile).filter(CandidateProfile.id == apt.candidat_id).first()
-        if not candidate:
-            raise ResourceNotFoundException("candidat", apt.candidat_id)
-
-        if current_teacher.role in ["Enseignant", "enseignant", "E"]:
-            candidate_service.verify_teacher_access(current_teacher.id, candidate)
-
-        apt.observations = observations
-        apt.decision_finale = decision_finale
-        apt.status = "termine"
-
-        # Mise à jour du statut du dossier
-        candidate.statut_dossier = "ENTRETIEN_REALISE"
-
-        # Conversion automatique du compte si admis (Section 6.8)
-        if decision_finale.lower() == "admis" and candidate.session_id:
-            auth_service.convert_visitor_to_candidate(
-                db=db,
-                session_id=candidate.session_id,
-                email=candidate.email,
-                nom=candidate.nom,
-                prenom=candidate.prenom,
-                telephone=candidate.telephone
+        # Crée ou met à jour l'Entretien associé
+        entretien = apt.entretien
+        if not entretien:
+            entretien = Entretien(
+                rendezvous_id=apt.id,
+                avisEnseignant="Favorable" if decision_finale.lower() == "admis" else "Défavorable",
+                notes=observations,
+                staut="Terminé"
             )
+            db.add(entretien)
+        else:
+            entretien.avisEnseignant = "Favorable" if decision_finale.lower() == "admis" else "Défavorable"
+            entretien.notes = observations
+            entretien.staut = "Terminé"
 
+        # Met à jour le statut du RendezVous
+        apt.statut = "confirmé"
         db.commit()
         db.refresh(apt)
         return apt

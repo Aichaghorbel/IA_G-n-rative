@@ -1,39 +1,73 @@
-from datetime import datetime
-from typing import Dict, List, Optional
+"""
+Schémas Pydantic pour les QCM, Questions et Réponses.
+Strictement conformes au diagramme de classes UML.
+
+QCM -> Questions -> ReponseQuestion (chaîne stricte, aucun lien direct QCM<->Réponse).
+QCM est lié à Preinscription uniquement (preinscription_id).
+"""
+from datetime import date, datetime
+from typing import Dict, List, Optional, Any
 from pydantic import BaseModel, Field
 
 
-class QCMQuestionDTO(BaseModel):
+class ReponseQuestionDTO(BaseModel):
+    """Schéma d'une réponse soumise pour une question."""
+    id: Optional[int] = None
+    estSelectionne: bool = False
+
+    class Config:
+        from_attributes = True
+
+
+class QuestionDTO(BaseModel):
+    """Schéma d'une Question du QCM (sans la bonne réponse, pour éviter la triche)."""
     id: int
-    question_text: str
-    options: List[str]
-    difficulty: str
+    contenu: str
+    niveau: str
+    categorie: str
 
     class Config:
         from_attributes = True
 
 
 class QCMResponse(BaseModel):
+    """Schéma de réponse pour un QCM."""
     id: int
-    candidate_id: int
-    formation_id: Optional[int]
-    total_questions: int
-    questions: List[QCMQuestionDTO]
+    preinscription_id: int
+    score: Optional[float] = None
+    datePassation: Optional[date] = None
+    niveau: Optional[str] = None
+    total_questions: int = 0
+    questions: List[QuestionDTO] = []
+
+    class Config:
+        from_attributes = True
 
 
-class AnswerItem(BaseModel):
+class ReponseSubmission(BaseModel):
+    """Soumission d'une réponse à une question (par question_id)."""
     question_id: int
-    selected_option: int = Field(..., ge=0, le=3)
+    estSelectionne: bool = True
 
 
 class QCMSubmissionRequest(BaseModel):
-    answers: List[AnswerItem]
+    """Soumission en lot des réponses du QCM."""
+    reponses: List[ReponseSubmission]
 
 
 class QCMResultResponse(BaseModel):
+    """Résultat d'un QCM après correction."""
     qcm_id: int
     score: float
-    completed: bool
-    # Les détails ne sont visibles que par l'enseignant et l'admin
-    result_summary: Optional[Dict[str, List[str]]] = None
-    created_at: datetime
+    niveau: Optional[str] = None
+    datePassation: Optional[date] = None
+    details: Optional[Dict[str, Any]] = None
+
+    class Config:
+        from_attributes = True
+
+
+# Alias de compatibilité pour les imports existants
+QCMQuestionDTO = QuestionDTO
+AnswerItem = ReponseSubmission
+QCMSubmissionRequest = QCMSubmissionRequest

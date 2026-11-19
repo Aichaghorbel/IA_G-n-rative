@@ -1,25 +1,105 @@
 from app.core.database import Base
-from app.models.user import User
-from app.models.candidate import CandidateProfile, PreRegistration
-from app.models.conversation import Conversation, Message
-from app.models.document import Document
-from app.models.recommendation import Formation, Recommendation
-from app.models.qcm import QCM, Question, Answer
-from app.models.appointment import Appointment, Notification
+from app.models.enums import (
+    Diplome,
+    Universite,
+    Sexe,
+    Niveau,
+    Cours,
+    TypeTarif,
+    Devise,
+    Source,
+    DiplomeSouhaite,
+    StatutRDV,
+    StatutPreinscription,
+    StatutRecommandation,
+    NiveauQSM,
+    Categorie,
+    Avis,
+    Departement,
+    SatutEntretien,
+    CategorieDoc,
+    TypeNotif,
+    TraitementType,
+    StautDoc,
+    Grade,
+)
+from app.models.user import User, Utilisateur, Enseignant, Responsable, CandidatUser
+from app.models.formation import (
+    Formation,
+    Tarif,
+    Equivalence,
+    Specialite,
+    ProgrammeEtude,
+    Matiere,
+    Formation_Candidat_association,
+)
+from app.models.candidate import Visiteur, Candidat, ProfilCandidat, CandidateProfile
+from app.models.qcm import Preinscription, PreRegistration, QCM, Question, ReponseQuestion, ReponseQCM, Answer
+from app.models.recommendation import Recommandation, Recommendation
+from app.models.conversation import Conversation, Message, Reponse, ReponseGeneree
+from app.models.appointment import RendezVous, Appointment, Entretien, Notification
+from app.models.document import Document, VersionDocument, TraitementDocument
 
 __all__ = [
     "Base",
+    # Enums
+    "Diplome",
+    "Universite",
+    "Sexe",
+    "Niveau",
+    "Cours",
+    "TypeTarif",
+    "Devise",
+    "Source",
+    "DiplomeSouhaite",
+    "StatutRDV",
+    "StatutPreinscription",
+    "StatutRecommandation",
+    "NiveauQSM",
+    "Categorie",
+    "Avis",
+    "Departement",
+    "SatutEntretien",
+    "CategorieDoc",
+    "TypeNotif",
+    "TraitementType",
+    "StautDoc",
+    "Grade",
+    # Entités
     "User",
+    "Utilisateur",
+    "Enseignant",
+    "Responsable",
+    "CandidatUser",
+    "Visiteur",
+    "Candidat",
     "CandidateProfile",
-    "PreRegistration",
-    "Conversation",
-    "Message",
-    "Document",
+    "ProfilCandidat",
     "Formation",
-    "Recommendation",
+    "Tarif",
+    "Equivalence",
+    "Specialite",
+    "ProgrammeEtude",
+    "Matiere",
+    "Formation_Candidat_association",
+    "Preinscription",
+    "PreRegistration",
     "QCM",
     "Question",
+    "ReponseQuestion",
+    "ReponseQCM",
     "Answer",
+    "Recommandation",
+    "Recommendation",
+    "Conversation",
+    "Message",
+    "Reponse",
+    "ReponseGeneree",
+    "RendezVous",
     "Appointment",
-    "Notification"
+    "Entretien",
+    "Notification",
+    "Document",
+    "VersionDocument",
+    "TraitementDocument",
 ]

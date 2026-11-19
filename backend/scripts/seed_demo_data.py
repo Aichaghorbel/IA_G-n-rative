@@ -1,251 +1,372 @@
 import json
 import os
 import sys
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, date, timedelta
 from pathlib import Path
 
-# Add backend directory to sys.path
 BASE_DIR = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(BASE_DIR))
 
 from app.core.database import Base, SessionLocal, engine
 from app.core.security import get_password_hash
-from app.models.appointment import Appointment, Notification
-from app.models.candidate import CandidateProfile, PreRegistration
-from app.models.conversation import Conversation, Message
-from app.models.document import Document
-from app.models.qcm import QCM, Question
-from app.models.recommendation import Formation, Recommendation
-from app.models.user import User
-from app.services.document_service import document_service
+from app.models.enums import (
+    Universite,
+    Diplome,
+    Sexe,
+    Niveau,
+    Cours,
+    TypeTarif,
+    Devise,
+    Source,
+    DiplomeSouhaite,
+    StatutRDV,
+    StatutPreinscription,
+    StatutRecommandation,
+    NiveauQSM,
+    Categorie,
+    Avis,
+    Departement,
+    SatutEntretien,
+    CategorieDoc,
+    TypeNotif,
+    TraitementType,
+    StautDoc,
+    Grade,
+)
+from app.models.user import User, Enseignant, Responsable
+from app.models.candidate import Visiteur, Candidat, ProfilCandidat
+from app.models.formation import Formation, Tarif, Equivalence, Specialite, ProgrammeEtude, Matiere
+from app.models.qcm import Preinscription, QCM, Question, ReponseQuestion
+from app.models.recommendation import Recommandation
+from app.models.appointment import RendezVous, Entretien, Notification
+from app.models.document import Document, VersionDocument, TraitementDocument
+from app.models.conversation import Conversation, Message, Reponse
 
 
 def seed_database():
     print("=" * 70)
-    print("  INITIALISATION DES DONNÉES DE DÉMONSTRATION SMARTCAMPUS AI")
+    print("  INITIALISATION DES DONNEES SMARTCAMPUS AI - DIAGRAMME DE CLASSES")
     print("=" * 70)
 
-    # 1. Création des tables
-    Base.metadata.create_all(bind=engine)
     db = SessionLocal()
 
     try:
-        # Chargement du fichier JSON
-        json_path = BASE_DIR / "data" / "demo_data.json"
-        with open(json_path, "r", encoding="utf-8") as f:
-            demo_data = json.load(f)
+        # 1. Responsable & Enseignants
+        resp = db.query(Responsable).filter(Responsable.email == "admin@smartcampus.tn").first()
+        if not resp:
+            resp = Responsable(
+                nom="Ben Abdallah",
+                prenom="Taoufik",
+                email="admin@smartcampus.tn",
+                motDePasse=get_password_hash("AdminSmartCampus2026!"),
+                telephone="+216 74 123 456",
+                universite=Universite.IIT.value
+            )
+            db.add(resp)
+            db.flush()
+            print(f"  [+] Responsable créé: {resp.email}")
 
-        # 2. Utilisateurs
-        user_map = {}
-        for u in demo_data.get("users", []):
-            existing = db.query(User).filter(User.email == u["email"].lower()).first()
-            if not existing:
-                user = User(
-                    email=u["email"].lower(),
-                    hashed_password=get_password_hash(u["password"]),
-                    role=u["role"],
-                    nom=u["nom"],
-                    prenom=u["prenom"],
-                    telephone=u.get("telephone"),
-                    is_active=True
-                )
-                db.add(user)
-                db.flush()
-                user_map[user.email] = user
-                print(f"  [+] Utilisateur créé: {user.email} (Rôle: {user.role})")
-            else:
-                user_map[existing.email] = existing
-                print(f"  [*] Utilisateur existant: {existing.email}")
+        ens_iit = db.query(Enseignant).filter(Enseignant.email == "enseignant.iit@smartcampus.tn").first()
+        if not ens_iit:
+            ens_iit = Enseignant(
+                nom="Gharbi",
+                prenom="Mohamed",
+                email="enseignant.iit@smartcampus.tn",
+                motDePasse=get_password_hash("TeacherPassword2026!"),
+                telephone="+216 74 234 567",
+                departement=Departement.INFORMATIQUE.value,
+                gradAcademique=Grade.PROFESSEUR_ENSEIGNEMENT_SUPERIEUR.value,
+                specialite="Génie Logiciel & IA",
+                universite=Universite.IIT.value
+            )
+            db.add(ens_iit)
+            db.flush()
+            print(f"  [+] Enseignant IIT créé: {ens_iit.email}")
 
-        # 3. Formations
-        formation_map = {}
-        for f_data in demo_data.get("formations", []):
-            existing = db.query(Formation).filter(Formation.code == f_data["code"]).first()
-            if not existing:
-                formation = Formation(
-                    code=f_data["code"],
-                    nom=f_data["nom"],
-                    etablissement=f_data["etablissement"],
-                    cycle=f_data["cycle"],
-                    duree_annees=f_data["duree_annees"],
-                    description=f_data["description"],
-                    avantages=f_data["avantages"],
-                    prerequis=f_data["prerequis"],
-                    debouches=f_data["debouches"]
-                )
-                db.add(formation)
-                db.flush()
-                formation_map[formation.code] = formation
-                print(f"  [+] Formation créée: {formation.nom} ({formation.etablissement})")
-            else:
-                formation_map[existing.code] = existing
-                print(f"  [*] Formation existante: {existing.nom}")
+        ens_isb = db.query(Enseignant).filter(Enseignant.email == "enseignant.isb@smartcampus.tn").first()
+        if not ens_isb:
+            ens_isb = Enseignant(
+                nom="Mezghani",
+                prenom="Amel",
+                email="enseignant.isb@smartcampus.tn",
+                motDePasse=get_password_hash("TeacherPassword2026!"),
+                telephone="+216 74 345 678",
+                departement=Departement.MARKETING_ET_E_BUSINESS.value,
+                gradAcademique=Grade.MAITRE_CONFERENCES.value,
+                specialite="Business Analytics & Finance",
+                universite=Universite.ISB.value
+            )
+            db.add(ens_isb)
+            db.flush()
+            print(f"  [+] Enseignant ISB créé: {ens_isb.email}")
 
-        # 4. Profils Candidats & Affectation
-        teacher_iit = user_map.get("enseignant.iit@smartcampus.tn")
-        teacher_isb = user_map.get("enseignant.isb@smartcampus.tn")
+        # 2. Formations, Tarifs, Equivalences, Specialites, Programmes, Matieres
+        f_gl = db.query(Formation).filter(Formation.nom.ilike("%Génie Logiciel%")).first()
+        if not f_gl:
+            f_gl = Formation(
+                nom="Cycle Ingénieur en Génie Logiciel & Informatique",
+                universite=Universite.IIT.value,
+                description="Formation d'ingénieurs d'excellence formant des concepteurs logiciels, experts cloud et IA.",
+                objectif="Former des ingénieurs aptes à concevoir des architectures distribuées modernes.",
+                duree=5,
+                debouches="Architecte Logiciel, Ingénieur IA / Data, Lead Tech, Chef de projet",
+                conditionsAdmission="Bac Scientifique ou admission sur titre après Licence/Prépa",
+                prerequis="Mathématiques, Algorithmique, Notions de programmation"
+            )
+            db.add(f_gl)
+            db.flush()
 
-        for cp in demo_data.get("candidate_profiles", []):
-            email = cp["email"].lower()
-            existing = db.query(CandidateProfile).filter(CandidateProfile.email == email).first()
-            if not existing:
-                user_acc = user_map.get(email)
-                profile = CandidateProfile(
-                    user_id=user_acc.id if user_acc else None,
-                    nom=cp["nom"],
-                    prenom=cp["prenom"],
-                    email=email,
-                    telephone=cp.get("telephone"),
-                    niveau_etudes=cp.get("niveau_etudes"),
-                    etablissement_origine=cp.get("etablissement_origine"),
-                    specialites=cp.get("specialites", []),
-                    interets=cp.get("interets", []),
-                    matieres_preferees=cp.get("matieres_preferees", []),
-                    objectif_professionnel=cp.get("objectif_professionnel"),
-                    contraintes=cp.get("contraintes"),
-                    etablissement_vise=cp.get("etablissement_vise"),
-                    statut_dossier=cp.get("statut_dossier", "EXPLORATION"),
-                    affectation_statut=cp.get("affectation_statut"),
-                    enseignant_affecte_id=teacher_iit.id if cp.get("etablissement_vise") == "IIT" and teacher_iit else (teacher_isb.id if teacher_isb else None),
-                    consent_rgpd=cp.get("consent_rgpd", True),
-                    consent_timestamp=datetime.now(timezone.utc)
-                )
-                db.add(profile)
-                db.flush()
-                print(f"  [+] Profil candidat créé: {profile.prenom} {profile.nom} (Statut: {profile.statut_dossier})")
+            # Tarifs
+            t1 = Tarif(formation_id=f_gl.id, montant_9mois=6500.0, type=TypeTarif.FRAIS_NATIONAL.value, Annee="2026-2027", devise=Devise.DT.value)
+            t2 = Tarif(formation_id=f_gl.id, montant_9mois=3200.0, type=TypeTarif.FRAIS_INTERNATIONAL.value, Annee="2026-2027", devise=Devise.EUR.value)
+            db.add_all([t1, t2])
 
-                # Préinscription associée
-                target_form = formation_map.get("IIT-ING-GL") if cp.get("etablissement_vise") == "IIT" else formation_map.get("ISB-LIC-BA")
-                prereg = PreRegistration(
-                    candidate_id=profile.id,
-                    formation_id=target_form.id if target_form else 1,
-                    decision="en_attente",
-                    observations="Dossier académique solide."
-                )
-                db.add(prereg)
-                db.flush()
+            # Equivalence
+            eq1 = Equivalence(formation_id=f_gl.id, desciption="Accès direct en 3ème année (1ère année cycle ingénieur)", conditions="Validation L2/L3 ou prépa", formation_Origine=Diplome.LICENCE.value)
+            db.add(eq1)
 
-                # Recommandation IA associée
-                rec = Recommendation(
-                    candidate_id=profile.id,
-                    formation_id=target_form.id if target_form else 1,
-                    score_compatibilite=0.94 if cp.get("etablissement_vise") == "IIT" else 0.89,
-                    justification="Forte affinité démontrée lors du parcours conversationnel.",
-                    status="valide",
-                    genere_par="agent_ia"
-                )
-                db.add(rec)
-                db.flush()
+            # Specialite -> Programme -> Matieres
+            spec_gl = Specialite(formation_id=f_gl.id, nom="Génie Logiciel & Cloud", description="Spécialisation ingénierie logicielle avancée")
+            db.add(spec_gl)
+            db.flush()
 
-                # QCM associé
-                qcm = QCM(
-                    candidate_id=profile.id,
-                    formation_id=target_form.id if target_form else 1,
-                    total_questions=3,
-                    score=85.0 if cp.get("etablissement_vise") == "IIT" else 78.0,
-                    completed=True,
-                    result_summary={
-                        "acquis": ["Algorithmique", "Raisonnement logique", "Conception d'APIs"],
-                        "difficultes": ["Statistiques avancées"],
-                        "motivations": "Très motivé par les projets appliqués et le travail en équipe."
-                    }
-                )
-                db.add(qcm)
-                db.flush()
+            prog1 = ProgrammeEtude(specialite_id=spec_gl.id, nom="Programme Tronc Commun Ingénieur", description="Semestre S1 d'intégration", semestre=1)
+            db.add(prog1)
+            db.flush()
 
-                # Entretien / Rendez-vous associé
-                apt = Appointment(
-                    candidat_id=profile.id,
-                    enseignant_id=profile.enseignant_affecte_id,
-                    preinscription_id=prereg.id,
-                    date_proposee=datetime.now(timezone.utc) + timedelta(days=2, hours=10),
-                    date_confirmee=datetime.now(timezone.utc) + timedelta(days=2, hours=10),
-                    status="confirme" if profile.statut_dossier == "ENTRETIEN_PLANIFIE" else "propose",
-                    lieu="Campus IIT - Salle A102",
-                    decision_finale="en_attente"
-                )
-                db.add(apt)
+            m1 = Matiere(programme_id=prog1.id, nom="Algorithmique Avancée & Complexité", description="Structures de données complexes", coefficient=3, volumeHoraire=42)
+            m2 = Matiere(programme_id=prog1.id, nom="Conception Orientée Objet & Design Patterns", description="Patterns GoF et SOLID", coefficient=3, volumeHoraire=42)
+            m3 = Matiere(programme_id=prog1.id, nom="Bases de Données Relationnelles & NoSQL", description="PostgreSQL et architectures distribuées", coefficient=2, volumeHoraire=35)
+            db.add_all([m1, m2, m3])
+            print(f"  [+] Formation complète IIT créée: {f_gl.nom}")
 
-                # Conversation de démo
-                conv = Conversation(
-                    candidate_id=profile.id,
-                    is_anonymous=False,
-                    language_detected="arabizi",
-                    intent_detected="info_programme",
-                    memory_summary={"interets": profile.interets, "niveau": profile.niveau_etudes}
-                )
-                db.add(conv)
-                db.flush()
+        f_ba = db.query(Formation).filter(Formation.nom.ilike("%Business Analytics%")).first()
+        if not f_ba:
+            f_ba = Formation(
+                nom="Licence Business Analytics & Intelligence des Données",
+                universite=Universite.ISB.value,
+                description="Cursus alliant gestion d'entreprise, marketing digital et analyse décisionnelle.",
+                objectif="Maîtriser la chaîne d'analyse de données d'entreprise pour la prise de décision stratégique.",
+                duree=3,
+                debouches="Data Analyst Business, Consultant BI, Responsable CRM",
+                conditionsAdmission="Baccalauréat Economie & Gestion, Mathématiques ou Sciences",
+                prerequis="Bases en mathématiques et statistiques"
+            )
+            db.add(f_ba)
+            db.flush()
 
-                msg_user = Message(
-                    conversation_id=conv.id,
-                    role="user",
-                    content="3aslema! N7eb na3ref akther 3la parcours Génie Logiciel fel IIT.",
-                    language_detected="arabizi",
-                    metadata_json={"intent": "info_programme"}
-                )
-                msg_bot = Message(
-                    conversation_id=conv.id,
-                    role="assistant",
-                    content="Mar7ba bik Sarra ! L'IIT t9addem diplôme d'ingénieur en Génie Logiciel (5 snin ou 3 snin ba3d Licence). Famma barcha stages w des projets réels.",
-                    language_detected="arabizi",
-                    metadata_json={"latency_ms": 310, "tokens_used": 95, "model": "qwen2.5-7b-instruct"}
-                )
-                db.add_all([msg_user, msg_bot])
+            t_isb = Tarif(formation_id=f_ba.id, montant_9mois=5200.0, type=TypeTarif.FRAIS_NATIONAL.value, Annee="2026-2027", devise=Devise.DT.value)
+            db.add(t_isb)
 
-        # 5. Documents RAG depuis sample_corpus
-        corpus_dir = BASE_DIR / "data" / "sample_corpus"
-        if corpus_dir.exists():
-            admin_user = user_map.get("admin@smartcampus.tn")
-            admin_id = admin_user.id if admin_user else 1
+            spec_ba = Specialite(formation_id=f_ba.id, nom="Business Analytics", description="Spécialité analytique appliquée")
+            db.add(spec_ba)
+            db.flush()
 
-            for doc_file in corpus_dir.glob("*.txt"):
-                content = doc_file.read_bytes()
-                sha = document_service.calculate_sha256(content)
-                existing = db.query(Document).filter(Document.hash_content == sha).first()
-                if not existing:
-                    etab = "IIT" if "iit" in doc_file.name else ("ISB" if "isb" in doc_file.name else "IIT")
-                    doc = Document(
-                        filename=doc_file.name,
-                        type="brochure" if "brochure" in doc_file.name else "fiche_faq",
-                        etablissement=etab,
-                        size_bytes=len(content),
-                        mime_type="text/plain",
-                        status="INDEXED",
-                        chunks_count=max(2, len(content) // 400),
-                        hash_content=sha,
-                        uploaded_by=admin_id,
-                        indexed_at=datetime.now(timezone.utc)
-                    )
-                    db.add(doc)
-                    print(f"  [+] Document RAG indexé: {doc_file.name} ({etab})")
+            prog_ba = ProgrammeEtude(specialite_id=spec_ba.id, nom="Fondamentaux de Business Intelligence", description="Semestre S1", semestre=1)
+            db.add(prog_ba)
+            db.flush()
 
-        # 6. Notification de bienvenue
-        for email, user in user_map.items():
+            m_ba1 = Matiere(programme_id=prog_ba.id, nom="Statistiques Décisionnelles", description="Modélisation statistique", coefficient=3, volumeHoraire=42)
+            m_ba2 = Matiere(programme_id=prog_ba.id, nom="Business Intelligence & Power BI", description="Tableaux de bord d'entreprise", coefficient=3, volumeHoraire=42)
+            db.add_all([m_ba1, m_ba2])
+            print(f"  [+] Formation complète ISB créée: {f_ba.nom}")
+
+        # 3. Visiteur, Candidat & ProfilCandidat
+        visiteur = db.query(Visiteur).filter(Visiteur.sessionToken == "sess_demo_sarra").first()
+        if not visiteur:
+            visiteur = Visiteur(
+                sessionToken="sess_demo_sarra",
+                ip_address="127.0.0.1",
+                dateVisite=date.today()
+            )
+            db.add(visiteur)
+            db.flush()
+
+        cand_user = db.query(User).filter(User.email == "sarra.benali@gmail.com").first()
+        if not cand_user:
+            cand_user = User(
+                nom="Ben Ali",
+                prenom="Sarra",
+                email="sarra.benali@gmail.com",
+                motDePasse=get_password_hash("CandidatePassword2026!"),
+                telephone="+216 21 000 111",
+                type_user="Candidat"
+            )
+            db.add(cand_user)
+            db.flush()
+
+        candidat = db.query(Candidat).filter(Candidat.visiteur_id == visiteur.id).first()
+        if not candidat:
+            candidat = Candidat(
+                visiteur_id=visiteur.id,
+                user_id=cand_user.id,
+                CIN="12345678",
+                passport="TN987654",
+                pays="Tunisie",
+                dateNaissance=date(2003, 5, 14),
+                sexe=Sexe.FEMME.value,
+                adresse="Route de Téniour Km 4, Sfax",
+                universite=Universite.IIT.value
+            )
+            db.add(candidat)
+            db.flush()
+
+            profil = ProfilCandidat(
+                candidat_id=candidat.id,
+                dernierDiplomeObtenu=Diplome.BACCALAUREAT.value,
+                anneeObtention="2024",
+                diplomeSouhaite=DiplomeSouhaite.GENIE_INFORMATIQUE.value,
+                niveau=Niveau.NIVEAU_1.value,
+                cours=Cours.COURS_DE_JOUR.value,
+                sourceConnaissanceUniversite=Source.SITE_WEB.value
+            )
+            db.add(profil)
+            print(f"  [+] Visiteur, Candidat et ProfilCandidat créés: {candidat.CIN}")
+
+            # Association Candidat s'inscrire Formation
+            candidat.formations.append(f_gl)
+
+            # Preinscription
+            preinscr = Preinscription(
+                candidat_id=candidat.id,
+                formation_id=f_gl.id,
+                dateCreation=date.today(),
+                statut=StatutPreinscription.ACCEPTE.value
+            )
+            db.add(preinscr)
+            db.flush()
+
+            # QCM généré par la préinscription
+            qcm = QCM(
+                preinscription_id=preinscr.id,
+                score=85.0,
+                datePassation=date.today(),
+                niveau=NiveauQSM.AVANCE.value
+            )
+            db.add(qcm)
+            db.flush()
+
+            q1 = Question(
+                qcm_id=qcm.id,
+                contenu="Quelle structure de données est la plus adaptée pour une pile LIFO ?",
+                correctReponse=1,
+                niveau=NiveauQSM.MOYENNE.value,
+                categorie=Categorie.ALGORITHMIQUE.value
+            )
+            db.add(q1)
+            db.flush()
+
+            rq1 = ReponseQuestion(question_id=q1.id, estSelectionne=True)
+            rq2 = ReponseQuestion(question_id=q1.id, estSelectionne=False)
+            db.add_all([rq1, rq2])
+
+            # Recommandation (liée uniquement au Candidat — pas de formation_id selon le diagramme)
+            rec = Recommandation(
+                candidat_id=candidat.id,
+                nom="Orientation Ingénierie Logicielle",
+                scoreComptabilite=0.95,
+                justification="Excellente adéquation avec le profil mathématique et algorithmique.",
+                dateGeneration=datetime.now(),
+                statut=StatutRecommandation.VALIDEE.value
+            )
+            db.add(rec)
+
+            # RendezVous (lié à Enseignant + Candidat — pas de responsable_id selon le diagramme)
+            rdv = RendezVous(
+                candidat_id=candidat.id,
+                enseignant_id=ens_iit.id,
+                dateHeure=datetime.now() + timedelta(days=2),
+                statut=StatutRDV.CONFIRME.value,
+                salleOuLien="Campus IIT - Salle B204"
+            )
+            db.add(rdv)
+            db.flush()
+
+            # Entretien (lié uniquement au RendezVous — pas d'enseignant_id direct selon le diagramme)
+            ent = Entretien(
+                rendezvous_id=rdv.id,
+                avisEnseignant=Avis.FAVORABLE.value,
+                notes="Très bon niveau technique, esprit logique et forte motivation.",
+                oriantationFinale=DiplomeSouhaite.GENIE_INFORMATIQUE.value,
+                staut=SatutEntretien.PLANIFIE.value
+            )
+            db.add(ent)
+
+            # Conversation (liée à Visiteur + Candidat — pas d'enseignant_id selon le diagramme)
+            conv = Conversation(
+                visiteur_id=visiteur.id,
+                candidat_id=candidat.id,
+                titre="Discussion orientation Cycle Ingénieur",
+                estFavori=True,
+                dateDernierModification=datetime.now()
+            )
+            db.add(conv)
+            db.flush()
+
+            msg = Message(
+                conversation_id=conv.idConversation,
+                contenu="Bonjour, je souhaite me renseigner sur le cycle ingénieur informatique.",
+                dateEnvoi=datetime.now()
+            )
+            db.add(msg)
+            db.flush()
+
+            rep = Reponse(
+                message_id=msg.idMessage,
+                contenu="Bonjour Sarra ! Le cycle ingénieur à l'IIT propose les filières Génie Logiciel, Télécom et IA.",
+                date=datetime.now(),
+                source="Brochure IIT 2026-2027"
+            )
+            db.add(rep)
+
+            # Notification
             notif = Notification(
-                user_id=user.id,
-                title="Bienvenue sur SmartCampus AI",
-                message=f"Bonjour {user.prenom}, votre espace {user.role} est configuré et prêt pour l'année universitaire 2026-2027.",
-                type="systeme"
+                user_id=cand_user.id,
+                type=TypeNotif.CONFIRMATION.value,
+                contenu="Votre préinscription en Cycle Ingénieur a été confirmée.",
+                dateEnvoi=datetime.now(),
+                envoyee=True
             )
             db.add(notif)
 
+        # 4. Documents, Versions & Traitements
+        doc = db.query(Document).filter(Document.nom == "Brochure Officielle IIT").first()
+        if not doc:
+            doc = Document(
+                nom="Brochure Officielle IIT",
+                description="Guide des formations et cursus de l'IIT 2026-2027",
+                categorie=CategorieDoc.GUIDE.value,
+                responsable_id=resp.id
+            )
+            db.add(doc)
+            db.flush()
+
+            vdoc = VersionDocument(
+                document_id=doc.id,
+                nomFichier="iit_brochure_2026_2027.pdf",
+                cheminFichier="/storage/docs/iit_brochure_2026_2027.pdf",
+                taille=2048.5,
+                dateAjout=date.today()
+            )
+            db.add(vdoc)
+
+            tdoc = TraitementDocument(
+                document_id=doc.id,
+                type=TraitementType.AJOUT.value,
+                date=date.today(),
+                statut=StautDoc.TERMINE.value
+            )
+            db.add(tdoc)
+            print(f"  [+] Document, Version et Traitement créés: {doc.nom}")
+
         db.commit()
         print("\n" + "=" * 70)
-        print("  SUCCÈS : Données de démonstration insérées avec succès !")
-        print("=" * 70)
-        print("\nComptes prêts pour tester la plateforme :")
-        print("  1. Administrateur unifié : admin@smartcampus.tn       | Mot de passe: AdminSmartCampus2026!")
-        print("  2. Enseignant (IIT)      : enseignant.iit@smartcampus.tn | Mot de passe: TeacherPassword2026!")
-        print("  3. Enseignant (ISB)      : enseignant.isb@smartcampus.tn | Mot de passe: TeacherPassword2026!")
-        print("  4. Candidat (IIT)        : sarra.benali@gmail.com       | Mot de passe: CandidatePassword2026!")
-        print("  5. Candidat (ISB)        : youssef.trabelsi@gmail.com   | Mot de passe: CandidatePassword2026!")
-        print("\nDocumentation Swagger : http://localhost:8000/docs")
+        print("  SUCCES : Base de données PostgreSQL initialisée avec succès !")
         print("=" * 70)
 
     except Exception as e:
         db.rollback()
-        print(f"\n[ERREUR] Échec du peuplement : {e}")
+        print(f"\n[ERREUR] Echec : {e}")
         raise e
     finally:
         db.close()

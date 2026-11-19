@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, Query, Response, status
 from sqlalchemy.orm import Session
 from app.api.deps import PaginationQuery, get_current_principal, get_db, require_roles
 from app.core.exceptions import ResourceNotFoundException
-from app.models.appointment import Appointment
+from app.models.appointment import Appointment, Entretien
 from app.models.candidate import CandidateProfile
 from app.models.user import User
 from app.schemas.appointment import (
@@ -33,7 +33,10 @@ def get_appointment_slots(
 ):
     now = datetime.now(timezone.utc)
     slots: List[AppointmentSlotResponse] = []
-    teachers = db.query(User).filter(User.role.in_(["Enseignant", "enseignant", "E"])).all()
+    # Filtre sur les utilisateurs de type Enseignant
+    teachers = db.query(User).filter(User.type_user == "Enseignant").all()
+    if enseignant_id:
+        teachers = [t for t in teachers if t.id == enseignant_id]
 
     for i, t in enumerate(teachers[:3]):
         for day_offset in range(1, 4):
@@ -53,24 +56,26 @@ def get_appointment_slots(
     response_model=AppointmentResponse,
     status_code=status.HTTP_201_CREATED,
     summary="Réserver un rendez-vous d'entretien",
-    description="Réserve un créneau de rendez-vous d'admission (génère l'invitation email)."
+    description="Réserve un créneau de rendez-vous d'admission pour un candidat."
 )
 def create_appointment(
     data: AppointmentCreate,
     principal=Depends(require_roles("Candidat", "Enseignant")),
     db: Session = Depends(get_db)
 ):
+    # Résolution du candidat à partir du compte connecté
     profile = db.query(CandidateProfile).filter(CandidateProfile.user_id == principal.id).first()
-    candidate_id = profile.id if profile else 1
-    enseignant_id = profile.enseignant_affecte_id if profile else None
+    candidat_id = profile.id if profile else None
+    if not candidat_id:
+        raise ResourceNotFoundException("profil candidat", principal.id)
 
+    # Crée un RendezVous selon le diagramme de classes
     apt = Appointment(
-        candidat_id=candidate_id,
-        enseignant_id=enseignant_id,
-        preinscription_id=data.preinscription_id,
-        date_proposee=data.date_proposee,
-        lieu=data.lieu or "en ligne",
-        status="propose"
+        candidat_id=candidat_id,
+        enseignant_id=None,  # Sera affecté par le Responsable
+        dateHeure=data.date_proposee,
+        statut="confirmé",
+        salleOuLien=data.lieu or "en ligne"
     )
     db.add(apt)
     db.commit()
@@ -107,7 +112,8 @@ def list_appointments(
     db: Session = Depends(get_db)
 ):
     query = db.query(Appointment)
-    if principal.role in ["Enseignant", "enseignant", "E"]:
+    if principal.type_user == "Enseignant":
+        # L'enseignant ne voit que ses propres rendez-vous
         query = query.filter(Appointment.enseignant_id == principal.id)
 
     total = query.count()
@@ -119,7 +125,7 @@ def list_appointments(
     "/{appointment_id}",
     response_model=AppointmentResponse,
     summary="Replanifier ou annuler un rendez-vous",
-    description="Met à jour la date ou le statut d'un rendez-vous."
+    description="Met à jour la date, le statut ou le lieu d'un rendez-vous."
 )
 def update_appointment(
     appointment_id: int,
@@ -132,13 +138,11 @@ def update_appointment(
         raise ResourceNotFoundException("rendez-vous", appointment_id)
 
     if data.date_proposee:
-        apt.date_proposee = data.date_proposee
-    if data.date_confirmee:
-        apt.date_confirmee = data.date_confirmee
+        apt.dateHeure = data.date_proposee
     if data.status:
-        apt.status = data.status
+        apt.statut = data.status
     if data.lieu:
-        apt.lieu = data.lieu
+        apt.salleOuLien = data.lieu
 
     db.commit()
     db.refresh(apt)
@@ -148,8 +152,8 @@ def update_appointment(
 @router.post(
     "/{appointment_id}/outcome",
     response_model=AppointmentResponse,
-    summary="Saisir le résultat et les observations de l'entretien (Enseignant affecté)",
-    description="Saisie des observations finales. Déclenche la conversion automatique visiteur -> candidat si admis."
+    summary="Saisir le résultat de l'entretien (Enseignant affecté)",
+    description="Saisie des observations finales. Crée un Entretien associé au RendezVous."
 )
 def record_outcome(
     appointment_id: int,

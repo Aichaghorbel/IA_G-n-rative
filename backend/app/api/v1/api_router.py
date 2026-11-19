@@ -6,6 +6,7 @@ from app.api.v1.endpoints import (
     candidates,
     conversations,
     documents,
+    formations,
     notifications,
     preregistrations,
     qcm,
@@ -15,7 +16,9 @@ from app.api.v1.endpoints import (
 
 api_router = APIRouter()
 
+# Routes conformes à la spécification et au diagramme de classes
 api_router.include_router(auth.router, prefix="/auth", tags=["Authentification & Comptes"])
+api_router.include_router(formations.router, prefix="/formations", tags=["Formations & Programmes"])
 api_router.include_router(candidates.router, prefix="/candidates", tags=["Candidats & Profils"])
 api_router.include_router(preregistrations.router, prefix="/preregistrations", tags=["Préinscriptions"])
 api_router.include_router(conversations.router, prefix="/conversations", tags=["Conversations & IA Multimodale"])
