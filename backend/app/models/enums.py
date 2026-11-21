@@ -5,6 +5,12 @@ from enum import Enum
 # ENUMERATIONS STRICTEMENT CONFORMES AU DIAGRAMME DE CLASSES
 # ==============================================================================
 
+class StatutPublication(str, Enum):
+    BROUILLON = "brouillon"
+    PUBLIE = "publie"
+    ARCHIVE = "archive"
+
+
 class Diplome(str, Enum):
     BACCALAUREAT = "Baccalauréat"
     PREPA = "Prépa"
