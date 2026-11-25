@@ -1,0 +1,158 @@
+services:
+
+  # ==============================================================================
+  # SERVICE 1 : PostgreSQL 16 + Extension pgvector (Vector Store & Base Relationnelle)
+  # ==============================================================================
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: smartcampus-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-smartcampus}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-smartcampus_password}
+      POSTGRES_DB: ${POSTGRES_DB:-smartcampus}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-scripts:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-smartcampus} -d ${POSTGRES_DB:-smartcampus}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - smartcampus-net
+
+  # ==============================================================================
+  # SERVICE 2 : pgAdmin 4 (Interface Web d'Administration PostgreSQL)
+  # ==============================================================================
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: smartcampus-pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-admin@smartcampus.tn}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin_password_2026}
+    ports:
+      - "${PGADMIN_PORT:-5050}:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - smartcampus-net
+
+  # ==============================================================================
+  # SERVICE 3 : Redis (Cache, Sessions et Rate Limiting)
+  # ==============================================================================
+  redis:
+    image: redis:7-alpine
+    container_name: smartcampus-redis
+    restart: unless-stopped
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - smartcampus-net
+
+  # ==============================================================================
+  # SERVICE 4 : Backend FastAPI (API REST, Authentification, Catalogue, Swagger)
+  # ==============================================================================
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: smartcampus-backend:latest
+    container_name: smartcampus-backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    environment:
+      - ENVIRONMENT=development
+      - DEBUG=True
+      - POSTGRES_USER=${POSTGRES_USER:-smartcampus}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-smartcampus_password}
+      - POSTGRES_DB=${POSTGRES_DB:-smartcampus}
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - DATABASE_URL=postgresql+psycopg2://${POSTGRES_USER:-smartcampus}:${POSTGRES_PASSWORD:-smartcampus_password}@postgres:5432/${POSTGRES_DB:-smartcampus}
+      - REDIS_URL=redis://redis:6379/0
+      - REDIS_ENABLED=True
+      - MINIO_ENDPOINT=minio:9000
+      - MINIO_ACCESS_KEY=${MINIO_ROOT_USER:-minioadmin}
+      - MINIO_SECRET_KEY=${MINIO_ROOT_PASSWORD:-minioadmin_secret}
+      - SMTP_HOST=mailpit
+      - SMTP_PORT=1025
+    volumes:
+      - ./backend:/app
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    networks:
+      - smartcampus-net
+
+  # ==============================================================================
+  # SERVICES ADDITIONNELS (MinIO S3 & Mailpit SMTP)
+  # Pour démarrer avec ces services : docker compose --profile extra up -d
+  # ==============================================================================
+  minio:
+    profiles: ["extra"]
+    image: minio/minio:latest
+    container_name: smartcampus-minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin_secret}
+    ports:
+      - "9000:9000"   # API S3
+      - "9001:9001"   # MinIO Console Web
+    volumes:
+      - minio_data:/data
+    networks:
+      - smartcampus-net
+
+  mailpit:
+    profiles: ["extra"]
+    image: axllent/mailpit:latest
+    container_name: smartcampus-mailpit
+    restart: unless-stopped
+    ports:
+      - "${SMTP_PORT:-1025}:1025"   # Port SMTP pour envoi backend
+      - "8025:8025"                 # Interface Web pour visualiser OTP / notifications
+    environment:
+      MP_MAX_MESSAGES: 500
+    networks:
+      - smartcampus-net
+
+# ==============================================================================
+# VOLUMES PERSISTANTS
+# ==============================================================================
+volumes:
+  postgres_data:
+    name: smartcampus-postgres-data
+  pgadmin_data:
+    name: smartcampus-pgadmin-data
+  redis_data:
+    name: smartcampus-redis-data
+  minio_data:
+    name: smartcampus-minio-data
+
+# ==============================================================================
+# RÉSEAU VIRTUEL DOCKER
+# ==============================================================================
+networks:
+  smartcampus-net:
+    name: smartcampus-net
+    driver: bridge

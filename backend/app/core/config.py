@@ -96,6 +96,17 @@ class Settings(BaseSettings):
     EMAILS_FROM_EMAIL: str = "contact@smartcampus.tn"
     EMAILS_FROM_NAME: str = "SmartCampus AI"
 
+ # ==============================================================================
+    # Sessions visiteurs & mémoire temporaire 
+    # ===========================================
+        
+    SESSION_CONTEXT_MESSAGES: int = 20          # messages renvoyés à l'agent IA
+    SESSION_MAX_STORED_MESSAGES: int = 50       # au-delà, les plus anciens sont supprimés
+    SESSION_MAX_MESSAGE_CHARS: int = 2000
+    SESSION_MAX_USER_MESSAGES: int = 200        # total par session
+    SESSION_MESSAGES_PER_MINUTE: int = 20
+    SESSION_CREATE_PER_IP_PER_HOUR: int = 10
+
     @field_validator("DEBUG", mode="before")
     def assemble_debug(cls, v: Any) -> bool:
         if isinstance(v, bool):

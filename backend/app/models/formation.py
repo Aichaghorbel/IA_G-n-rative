@@ -11,7 +11,7 @@ Principes appliqués :
     * Many-to-Many Association Table (`formation_candidat`).
 """
 
-from sqlalchemy import Column, Integer, String, Float, Table, ForeignKey
+from sqlalchemy import Column, Integer, String, Float, Table, ForeignKey, Date
 from sqlalchemy.orm import relationship
 from app.core.database import Base
 
@@ -61,6 +61,11 @@ class Formation(Base):
     conditionsAdmission = Column(String(1000), nullable=True)
     prerequis = Column(String(1000), nullable=True)
 
+    # Statut de publication et période de validité (Gouvernance & Validité)
+    statut_publication = Column(String(50), default="publie", nullable=False)
+    date_debut_validite = Column(Date, nullable=True)
+    date_fin_validite = Column(Date, nullable=True)
+
     # 1 Formation posséder 1..* Tarif
     tarifs = relationship("Tarif", back_populates="formation", cascade="all, delete-orphan")
 
@@ -99,6 +104,7 @@ class Tarif(Base):
     type = Column(String(50), nullable=False)         # TypeTarif: fraisNational, frais international
     Annee = Column("Annee", String(50), nullable=False)
     devise = Column(String(10), nullable=False)        # Devise: DT, €
+    modalites_paiement = Column(String(500), nullable=True)
 
     formation_id = Column(Integer, ForeignKey("formations.id"), nullable=False, index=True)
 

@@ -11,7 +11,8 @@ from app.api.v1.endpoints import (
     preregistrations,
     qcm,
     recommendations,
-    stats
+    stats,
+    sessions
 )
 
 api_router = APIRouter()
@@ -29,3 +30,4 @@ api_router.include_router(appointments.router, prefix="/appointments", tags=["Re
 api_router.include_router(notifications.router, tags=["Notifications & Emails"])
 api_router.include_router(stats.router, prefix="/stats", tags=["Statistiques & Décision"])
 api_router.include_router(admin.router, prefix="/admin", tags=["Administration & Supervision"])
+api_router.include_router(sessions.router, tags=["Sessions Visiteurs & Mémoire"])

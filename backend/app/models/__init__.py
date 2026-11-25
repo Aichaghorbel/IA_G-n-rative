@@ -39,7 +39,7 @@ from app.models.recommendation import Recommandation, Recommendation
 from app.models.conversation import Conversation, Message, Reponse, ReponseGeneree
 from app.models.appointment import RendezVous, Appointment, Entretien, Notification
 from app.models.document import Document, VersionDocument, TraitementDocument
-
+from app.models.visitor_session import VisitorSession, ConversationMessage  
 __all__ = [
     "Base",
     # Enums
@@ -102,4 +102,6 @@ __all__ = [
     "Document",
     "VersionDocument",
     "TraitementDocument",
+    "VisitorSession",
+    "ConversationMessage"
 ]

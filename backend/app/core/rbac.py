@@ -25,7 +25,7 @@ class Role:
             return cls.CANDIDAT
         if r in ("e", "enseignant"):
             return cls.ENSEIGNANT
-        if r in ("a", "administrateur", "admin"):
+        if r in ("a", "administrateur", "admin", "responsable"):
             return cls.ADMINISTRATEUR
         return role.capitalize()
 
