@@ -1,0 +1,19 @@
+# INSTITUT INTERNATIONAL DE TECHNOLOGIE (IIT) - GUIDE ACADÉMIQUE 2026-2027
+UNIVERSITÉ NORD-AMÉRICAINE PRIVÉE (UNA) - SFAX, TUNISIE
+
+1. PRÉSENTATION DE L'IIT
+L'IIT est un établissement universitaire privé d'élite offrant une formation d'ingénieurs et des licences reconnues à l'échelle nationale et internationale. Le campus dispose de laboratoires à la pointe de la technologie (laboratoire d'IA, réseaux Cisco, systèmes embarqués, robotique).
+
+2. PARCOURS INGÉNIEUR EN GÉNIE LOGICIEL & INFORMATIQUE
+- Durée : 5 ans (2 ans de Cycle Préparatoire Intégré + 3 ans de Spécialisation Ingénieur)
+- Accès parallèle : Les étudiants titulaires d'une Licence en Informatique ou ayant réussi le concours national peuvent intégrer directement la 3ème année (1ère année cycle ingénieur).
+- Compétences développées :
+  * Conception d'architectures microservices et cloud-native (Docker, Kubernetes).
+  * Développement full-stack moderne (FastAPI, Angular, React, Spring Boot).
+  * Intelligence Artificielle générative, Traitement Automatique du Langage Naturel (NLP) et Computer Vision.
+  * DevOps, Intégration Continue (CI/CD) et Cybersécurité des applications.
+- Débouchés : Architecte Logiciel, Ingénieur R&D en IA, Lead Développeur, Consultant Cloud.
+
+3. PARCOURS LICENCE EN INFORMATIQUE (3 ANS)
+- Objectif : Former des spécialistes immédiatement opérationnels dans les métiers du développement web, mobile et de l'administration de bases de données.
+- Passerelles : Les diplômés avec mention ont une priorité d'admission directe au cycle ingénieur de l'IIT sans passer par un concours externe.

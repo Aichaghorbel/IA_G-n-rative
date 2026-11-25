@@ -1,0 +1,190 @@
+{
+  "users": [
+    {
+      "email": "admin@smartcampus.tn",
+      "password": "AdminSmartCampus2026!",
+      "role": "Administrateur",
+      "nom": "Ben Abdallah",
+      "prenom": "Taoufik",
+      "telephone": "+216 74 123 456"
+    },
+    {
+      "email": "enseignant.iit@smartcampus.tn",
+      "password": "TeacherPassword2026!",
+      "role": "Enseignant",
+      "nom": "Gharbi",
+      "prenom": "Mohamed",
+      "telephone": "+216 74 234 567"
+    },
+    {
+      "email": "enseignant.isb@smartcampus.tn",
+      "password": "TeacherPassword2026!",
+      "role": "Enseignant",
+      "nom": "Mezghani",
+      "prenom": "Amel",
+      "telephone": "+216 74 345 678"
+    },
+    {
+      "email": "sarra.benali@gmail.com",
+      "password": "CandidatePassword2026!",
+      "role": "Candidat",
+      "nom": "Ben Ali",
+      "prenom": "Sarra",
+      "telephone": "+216 21 000 111"
+    },
+    {
+      "email": "youssef.trabelsi@gmail.com",
+      "password": "CandidatePassword2026!",
+      "role": "Candidat",
+      "nom": "Trabelsi",
+      "prenom": "Youssef",
+      "telephone": "+216 22 000 222"
+    }
+  ],
+  "formations": [
+    {
+      "code": "IIT-ING-GL",
+      "nom": "Cycle Ingénieur en Génie Logiciel & Informatique",
+      "etablissement": "IIT",
+      "cycle": "Ingénieur",
+      "duree_annees": 5,
+      "description": "Formation d'ingénieurs d'excellence formant des concepteurs logiciels, experts cloud, architectes microservices et ingénieurs en IA appliquée.",
+      "avantages": [
+        "Diplôme reconnu à l'international et accrédité",
+        "Stages pratiques en Tunisie et à l'étranger",
+        "Laboratoires de pointe et projets réels industriels"
+      ],
+      "prerequis": [
+        "Baccalauréat Scientifique (Mathématiques, Sciences Expérimentales, Informatique, Technique)",
+        "Ou admission parallèle après Prépa ou Licence L2/L3"
+      ],
+      "debouches": [
+        "Architecte Logiciel",
+        "Ingénieur Intelligence Artificielle & Data",
+        "Lead Développeur Full-Stack / Cloud",
+        "Chef de projet informatique"
+      ]
+    },
+    {
+      "code": "IIT-LIC-INFO",
+      "nom": "Licence en Informatique & Systèmes d'Information",
+      "etablissement": "IIT",
+      "cycle": "Licence",
+      "duree_annees": 3,
+      "description": "Cursus en 3 ans axé sur le développement d'applications, les bases de données, le réseau et les technologies web modernes.",
+      "avantages": [
+        "Passerelle directe vers le Cycle Ingénieur IIT",
+        "Projets tutorés dès la première année",
+        "Partenariats technologiques de premier plan"
+      ],
+      "prerequis": [
+        "Baccalauréat toutes séries avec affinité pour le numérique"
+      ],
+      "debouches": [
+        "Développeur Web / Mobile",
+        "Administrateur bases de données",
+        "Technicien supérieur systèmes et réseaux",
+        "Poursuite d'études en Cycle Ingénieur ou Master"
+      ]
+    },
+    {
+      "code": "IIT-PREPA-INT",
+      "nom": "Cycle Préparatoire Intégré",
+      "etablissement": "IIT",
+      "cycle": "Prépa",
+      "duree_annees": 2,
+      "description": "2 années intensives de consolidation en mathématiques, physique et algorithmique permettant d'intégrer directement le cycle ingénieur sans concours national.",
+      "avantages": [
+        "Accès direct au cycle d'ingénieur de son choix",
+        "Encadrement renforcé et contrôle continu",
+        "Immersion précoce dans les sciences informatiques"
+      ],
+      "prerequis": [
+        "Bac Mathématiques, Sciences Expérimentales ou Informatique"
+      ],
+      "debouches": [
+        "Accès direct en 3ème année Génie Logiciel, Télécom ou Mécanique"
+      ]
+    },
+    {
+      "code": "ISB-LIC-BA",
+      "nom": "Licence Business Analytics & Intelligence des Données",
+      "etablissement": "ISB",
+      "cycle": "Licence",
+      "duree_annees": 3,
+      "description": "Cursus alliant gestion d'entreprise, marketing digital, finance et analyse avancée des données décisionnelles (Big Data, PowerBI, Python).",
+      "avantages": [
+        "Double compétence managériale et analytique très recherchée",
+        "Certifications professionnelles incluses (Power BI, Google Analytics)",
+        "Incubateur de projets entrepreneuriaux"
+      ],
+      "prerequis": [
+        "Baccalauréat Économie & Gestion, Mathématiques ou Lettres"
+      ],
+      "debouches": [
+        "Data Analyst Business",
+        "Consultant en Business Intelligence",
+        "Responsable marketing digital et CRM",
+        "Analyste financier d'entreprise"
+      ]
+    },
+    {
+      "code": "ISB-LIC-FIN",
+      "nom": "Licence Finance & Comptabilité Internationale",
+      "etablissement": "ISB",
+      "cycle": "Licence",
+      "duree_annees": 3,
+      "description": "Formation pointue aux normes IFRS, à la finance de marché, à l'audit financier et à la gestion des risques bancaires.",
+      "avantages": [
+        "Préparation aux examens professionnels comptables",
+        "Stages en cabinets d'audit internationaux",
+        "Salle de marchés simulée"
+      ],
+      "prerequis": [
+        "Bac Économie & Gestion ou Mathématiques"
+      ],
+      "debouches": [
+        "Auditeur financier junior",
+        "Contrôleur de gestion",
+        "Analyste crédit en banque",
+        "Comptable d'entreprise"
+      ]
+    }
+  ],
+  "candidate_profiles": [
+    {
+      "email": "sarra.benali@gmail.com",
+      "nom": "Ben Ali",
+      "prenom": "Sarra",
+      "telephone": "+216 21 000 111",
+      "niveau_etudes": "bac",
+      "etablissement_origine": "Lycée Pilote de Sfax",
+      "specialites": ["Mathématiques", "Informatique"],
+      "interets": ["Intelligence Artificielle", "Développement Web", "Robotique"],
+      "matieres_preferees": ["Mathématiques", "Algorithmique"],
+      "objectif_professionnel": "Devenir ingénieure en Intelligence Artificielle et travailler sur des modèles génératifs.",
+      "contraintes": "Souhaite étudier à Sfax, recherche un campus moderne avec vie associative active.",
+      "etablissement_vise": "IIT",
+      "statut_dossier": "ENTRETIEN_PLANIFIE",
+      "affectation_statut": "valide",
+      "consent_rgpd": true
+    },
+    {
+      "email": "youssef.trabelsi@gmail.com",
+      "nom": "Trabelsi",
+      "prenom": "Youssef",
+      "telephone": "+216 22 000 222",
+      "niveau_etudes": "bac",
+      "etablissement_origine": "Lycée 15 Novembre Sfax",
+      "specialites": ["Économie", "Gestion"],
+      "interets": ["Big Data", "Fintech", "Marketing"],
+      "matieres_preferees": ["Économie", "Statistiques"],
+      "objectif_professionnel": "Créer une startup fintech et gérer des investissements basés sur les données.",
+      "contraintes": "Besoin de cours interactifs et de stages pratiques en entreprise.",
+      "etablissement_vise": "ISB",
+      "statut_dossier": "QCM_FAIT",
+      "affectation_statut": "auto_proposed",
+      "consent_rgpd": true
+    }
+  ]
+}

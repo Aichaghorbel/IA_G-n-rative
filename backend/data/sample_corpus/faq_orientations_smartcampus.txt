@@ -1,0 +1,10 @@
+# SMARTCAMPUS AI — FOIRE AUX QUESTIONS (FAQ) & ORIENTATION COMMUNE IIT / ISB
+
+Q1 : Quelle est la différence entre le Cycle Préparatoire Intégré et la Licence Informatique à l'IIT ?
+R1 : Le Cycle Préparatoire Intégré est un programme intensif de 2 ans axé sur les sciences fondamentales (maths, physique) et l'algorithmique, conçu spécifiquement pour intégrer le Cycle Ingénieur IIT. La Licence Informatique est un cursus professionnalisant en 3 ans axé sur le développement logiciel immédiat, avec la possibilité pour les meilleurs étudiants de postuler en cycle ingénieur.
+
+Q2 : Est-ce qu'un candidat avec un Bac Économie & Gestion peut postuler à l'IIT ?
+R2 : Les formations d'ingénieurs et de prépa de l'IIT requièrent un Baccalauréat Scientifique ou Informatique. En revanche, un bachelier Économie & Gestion trouvera un parcours idéal à l'ISB, notamment la Licence Business Analytics qui intègre une forte dimension informatique décisionnelle.
+
+Q3 : Comment se déroule l'entretien d'admission ?
+R3 : L'entretien dure environ 20 à 30 minutes avec un enseignant responsable. Il permet d'échanger sur vos motivations, votre projet professionnel, d'analyser les résultats du QCM adaptatif et de confirmer l'adéquation du parcours choisi.
