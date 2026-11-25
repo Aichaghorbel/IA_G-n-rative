@@ -82,25 +82,24 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   activityData = this.weeklyData;
 
   recentActivity = [
-    { id: 1, action: 'A posé une question au Chatbot IA', time: 'Il y a 2 heures', type: 'chat' },
-    { id: 2, action: 'A généré un email "Demande de stage"', time: 'Hier à 14:30', type: 'email' },
-    { id: 3, action: 'A consulté la FAQ - Inscription', time: 'Hier à 10:15', type: 'doc' },
-    { id: 4, action: 'A mis à jour son profil', time: 'Il y a 3 jours', type: 'profile' },
-    { id: 5, action: 'A demandé un résumé de cours', time: 'Il y a 4 jours', type: 'chat' }
+    { id: 1, action: 'A posé une question au Chatbot IA SmartCampus', time: 'Il y a 2 heures', type: 'chat' },
+    { id: 2, action: 'A complété le QCM adaptatif d’orientation', time: 'Hier à 14:30', type: 'qcm' },
+    { id: 3, action: 'A consulté le catalogue des formations IIT & ISB', time: 'Hier à 10:15', type: 'doc' },
+    { id: 4, action: 'A mis à jour son dossier de préinscription', time: 'Il y a 3 jours', type: 'profile' },
+    { id: 5, action: 'Entretien pédagogique planifié', time: 'Il y a 4 jours', type: 'rdv' }
   ];
 
   favoriteMessages = [
-    { id: 1, text: 'La Révolution française (1789-1799) est une période de bouleversements...', source: 'Chatbot IA', time: 'Il y a 2h' },
-    { id: 2, text: 'Pour vous inscrire au semestre 2, rendez-vous sur le portail étudiant...', source: 'Chatbot IA', time: 'Hier' },
-    { id: 3, text: 'Les supports de cours sont disponibles sur la plateforme Moodle...', source: 'Chatbot IA', time: 'Il y a 2j' },
-    { id: 4, text: 'Votre certificat de scolarité est disponible dans la section Documents...', source: 'Chatbot IA', time: 'Il y a 3j' },
-    { id: 5, text: 'Les notes sont publiées sur le portail étudiant après délibération...', source: 'Chatbot IA', time: 'Il y a 5j' }
+    { id: 1, text: 'Le Cycle Préparatoire Intégré de l’IIT (2 ans) donne accès direct au Cycle Ingénieur sans concours externe.', source: 'SmartCampus AI', time: 'Il y a 2h' },
+    { id: 2, text: 'La Licence Business Intelligence de l’ISB combine gestion, data analytics et parcours bilingue.', source: 'SmartCampus AI', time: 'Hier' },
+    { id: 3, text: 'Votre entretien d’orientation permet de valider votre choix de filière avec un enseignant conseiller.', source: 'SmartCampus AI', time: 'Il y a 2j' },
+    { id: 4, text: 'Les dossiers de préinscription IIT & ISB sont suivis en temps réel depuis votre tableau de bord.', source: 'SmartCampus AI', time: 'Il y a 3j' }
   ];
 
   progressionData = [
-    { name: 'Questions', value: 124 },
-    { name: 'Résumés', value: 45 },
-    { name: 'Emails', value: 12 }
+    { name: 'Questions IA', value: 18 },
+    { name: 'Parcours consultés', value: 6 },
+    { name: 'QCM & Tests', value: 4 }
   ];
 
   progressionTab = signal<'bar' | 'pie'>('pie');
@@ -304,12 +303,20 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
     this.router.navigate(['/student/chatbot']);
   }
 
+  ouvrirMonRendezVous() {
+    const rdv = this.monRendezVous();
+    if (rdv) {
+      this.orientationService.ouvrirModalEntretien(rdv);
+    }
+  }
+
   getActivityIcon(type: string): string {
     switch (type) {
       case 'chat': return 'message-square';
-      case 'email': return 'mail';
-      case 'doc': return 'file-text';
+      case 'qcm': return 'sparkles';
+      case 'doc': return 'book-open';
       case 'profile': return 'user';
+      case 'rdv': return 'calendar';
       default: return 'help-circle';
     }
   }
@@ -317,9 +324,10 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   getActivityColor(type: string): string {
     switch (type) {
       case 'chat': return 'text-[#1d4b99]';
-      case 'email': return 'text-purple-500';
+      case 'qcm': return 'text-amber-500';
       case 'doc': return 'text-emerald-500';
       case 'profile': return 'text-slate-400';
+      case 'rdv': return 'text-purple-500';
       default: return 'text-slate-400';
     }
   }

@@ -10,6 +10,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { animate, style, transition, trigger } from '@angular/animations';
 import { ChatbotService, Message, Conversation, MessageType, FormType, FormField } from '../../../services/chatbot.service';
@@ -59,6 +60,10 @@ export class ChatbotComponent implements AfterViewChecked, AfterViewInit {
   @ViewChild('textarea') textareaRef!: ElementRef;
 
   private chatbotService = inject(ChatbotService);
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+
+  isVisitorMode = signal<boolean>(this.route.snapshot.data['visitorMode'] === true);
 
   /* ── Local Component UI State ── */
   inputValue = '';
@@ -98,14 +103,30 @@ export class ChatbotComponent implements AfterViewChecked, AfterViewInit {
   /* ── Lifecycle ── */
   private shouldScroll = false;
 
-  ngAfterViewInit() {
-  }
-
   ngAfterViewChecked() {
     if (this.shouldScroll) {
       this.scrollToBottom();
       this.shouldScroll = false;
     }
+  }
+
+  ngAfterViewInit() {
+    const keepSession = this.route.snapshot.queryParamMap.get('keepSession') === '1';
+    if (this.isVisitorMode() && !keepSession) {
+      this.chatbotService.startNewConversation();
+    }
+    const prompt = this.route.snapshot.queryParamMap.get('prompt');
+    if (prompt) {
+      setTimeout(() => this.sendMessage(prompt), 100);
+    }
+  }
+
+  goHome() {
+    this.router.navigate(['/']);
+  }
+
+  goToLogin() {
+    this.router.navigate(['/login']);
   }
 
   /* ── Scroll ── */

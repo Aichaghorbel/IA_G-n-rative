@@ -1,10 +1,12 @@
 import { Component, inject, signal, computed, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { OrientationService, Parcours } from '../../../services/orientation.service';
 import { AuthService } from '../../../services/auth.service';
+
+export type SchoolFilter = 'ALL' | 'IIT' | 'ISB';
 
 @Component({
   selector: 'app-parcours',
@@ -19,11 +21,58 @@ export class ParcoursComponent {
   private orientationService = inject(OrientationService);
   private authService = inject(AuthService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
 
   user = this.authService.user;
   parcoursList = this.orientationService.parcoursList;
+  isPublicMode = signal<boolean>(this.route.snapshot.data['publicMode'] === true);
 
-  selectedUni = signal<'TOUT' | 'IIT' | 'ISB'>('IIT');
+  iitCount = computed(() => this.parcoursList().filter(p => p.universite === 'IIT').length);
+  isbCount = computed(() => this.parcoursList().filter(p => p.universite === 'ISB').length);
+
+  selectedUni = signal<'TOUT' | 'IIT' | 'ISB'>('TOUT');
+  activeIndex = signal<number>(0);
+
+  get selectedSchool(): SchoolFilter {
+    return this.selectedUni() === 'TOUT' ? 'ALL' : (this.selectedUni() as SchoolFilter);
+  }
+
+  get schoolTabs() {
+    return [
+      { id: 'ALL' as SchoolFilter, label: 'Toutes les écoles', count: this.parcoursList().length },
+      { id: 'IIT' as SchoolFilter, label: 'IIT', count: this.iitCount() },
+      { id: 'ISB' as SchoolFilter, label: 'ISB', count: this.isbCount() },
+    ];
+  }
+
+  get pageHeading(): string {
+    if (this.selectedSchool === 'ISB') return 'Formations de l’ISB';
+    if (this.selectedSchool === 'IIT') return 'Formations de l’IIT';
+    return 'Formations de l’IIT & de l’ISB';
+  }
+
+  get pageSubtitle(): string {
+    if (this.selectedSchool === 'ISB') {
+      return 'Licences bilingues et anglophones, Business Intelligence, Finance internationale, Marketing Digital et Droit des Affaires.';
+    }
+    if (this.selectedSchool === 'IIT') {
+      return 'Cycle Préparatoire intégré, Licences appliquées, Cycle Ingénieur accrédité EUR-ACE, Architecture 6 ans et Master Industrie 4.0.';
+    }
+    return 'Filtrez nos programmes accrédités par établissement, cycle d’études ou régime de cours, et consultez les matières, équivalences, tarifs et débouchés.';
+  }
+
+  get formattedIndex(): string {
+    return String(this.activeIndex() + 1).padStart(2, '0');
+  }
+
+  get formattedTotal(): string {
+    return String(this.filteredParcours().length).padStart(2, '0');
+  }
+
+  onSchoolChange(school: SchoolFilter): void {
+    this.selectedUni.set(school === 'ALL' ? 'TOUT' : school);
+    this.activeIndex.set(0);
+  }
   searchQuery = signal<string>('');
   selectedParcoursForDetails = signal<Parcours | null>(null);
 
@@ -43,6 +92,23 @@ export class ParcoursComponent {
       this.formNom = currentUser.name || '';
       this.formEmail = currentUser.email || '';
     }
+
+    if (this.isPublicMode()) {
+      const univParam = this.route.snapshot.queryParamMap.get('univ');
+      if (univParam === 'IIT' || univParam === 'ISB') {
+        this.selectedUni.set(univParam);
+      }
+    } else if (currentUser?.university === 'IIT' || currentUser?.university === 'ISB') {
+      this.selectedUni.set(currentUser.university);
+    }
+  }
+
+  goHome() {
+    this.router.navigate(['/']);
+  }
+
+  goToLogin() {
+    this.router.navigate(['/login']);
   }
 
   // Visual styling dictionary per parcours (avec cache pour performance ultra-rapide)
@@ -199,6 +265,24 @@ export class ParcoursComponent {
         iconColor: 'text-amber-500',
         descBg: 'from-amber-600/10 to-orange-600/10 text-amber-800',
         btnGrad: 'from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500'
+      };
+    }
+
+    // Mastère / Master IIT
+    if (typeLower.includes('master') || nomLower.includes('mastère') || nomLower.includes('master')) {
+      return {
+        bgImage: 'assets/images/MASTER.jpg',
+        badgeColor: 'text-purple-300 border-purple-500/20',
+        tag1Color: 'text-purple-300 border-purple-500/20',
+        tag2Color: 'text-indigo-300 border-indigo-500/20',
+        subColor: 'text-purple-200',
+        actionPulse: 'text-purple-400',
+        titleGrad: 'from-purple-600 to-indigo-600',
+        borderBack: 'border-purple-200',
+        badgeBack: 'bg-purple-50 text-purple-700 border-purple-200',
+        iconColor: 'text-purple-500',
+        descBg: 'from-purple-600/10 to-indigo-600/10 text-purple-800',
+        btnGrad: 'from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500'
       };
     }
 

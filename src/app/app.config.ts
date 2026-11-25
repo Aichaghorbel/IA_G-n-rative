@@ -13,7 +13,8 @@ import {
   Sun, Moon, Globe, Info, Palette, Camera, ChevronLeft, Send, Sparkles, Copy, RefreshCw, Paperclip,
   Contact, MapPin, Calendar, BookOpen, Phone, Layers, Megaphone, Star, Radio,
   MoreVertical, MoreHorizontal, Volume2, File, Coins, EyeOff, Folder, Mic, Square,
-  ClipboardCheck, ArrowLeft, ArrowRight, UserCheck, Video
+  ClipboardCheck, ArrowLeft, ArrowRight, UserCheck, Video,
+  Compass, CheckCircle2, FileCheck2, RotateCw
 } from 'lucide-angular';
 
 import { routes } from './app.routes';
@@ -33,7 +34,8 @@ export const appConfig: ApplicationConfig = {
       Sun, Moon, Globe, Info, Palette, Camera, ChevronLeft, Send, Sparkles, Copy, RefreshCw, Paperclip,
       Contact, MapPin, Calendar, BookOpen, Phone, Layers, Megaphone, Star, Radio,
       MoreVertical, MoreHorizontal, Volume2, File, Coins, EyeOff, Folder, Mic, Square,
-      ClipboardCheck, ArrowLeft, ArrowRight, UserCheck, Video
+      ClipboardCheck, ArrowLeft, ArrowRight, UserCheck, Video,
+      Compass, CheckCircle2, FileCheck2, RotateCw
     }))
   ]
 };

@@ -86,9 +86,38 @@
     
     <!-- Top Result Banner -->
     <div class="bg-white rounded-2xl border border-slate-200 p-8 shadow-sm text-center relative overflow-hidden">
-      <div class="w-20 h-20 rounded-full mx-auto flex items-center justify-center text-3xl font-black text-white shadow-lg mb-4"
-        [class]="resultat()!.scoreGlobal >= 70 ? 'bg-gradient-to-tr from-emerald-500 to-teal-400' : 'bg-gradient-to-tr from-blue-600 to-cyan-500'">
-        {{ resultat()!.scoreGlobal }}%
+      <!-- Circular QCM Score Ring -->
+      <div class="relative w-32 h-32 mx-auto mb-5 flex items-center justify-center">
+        <svg class="w-full h-full -rotate-90" viewBox="0 0 120 120" aria-hidden="true">
+          <circle
+            cx="60"
+            cy="60"
+            r="50"
+            fill="none"
+            stroke="#E2E8F0"
+            stroke-width="10"
+          />
+          <circle
+            cx="60"
+            cy="60"
+            r="50"
+            fill="none"
+            stroke="#2563EB"
+            stroke-width="10"
+            stroke-linecap="round"
+            [attr.stroke-dasharray]="314.16"
+            [attr.stroke-dashoffset]="314.16 * (1 - resultat()!.scoreGlobal / 100)"
+            style="transition: stroke-dashoffset 0.8s cubic-bezier(0.22, 1, 0.36, 1);"
+          />
+        </svg>
+        <div class="absolute inset-0 flex flex-col items-center justify-center">
+          <span class="text-2xl font-extrabold text-[#102A43] leading-none tabular-nums">
+            {{ resultat()!.scoreGlobal }}%
+          </span>
+          <span class="mt-1 text-[10px] font-semibold tracking-wider uppercase text-slate-500">
+            SCORE QCM
+          </span>
+        </div>
       </div>
 
       <h2 class="text-2xl font-bold text-slate-900 mb-1">
@@ -136,19 +165,6 @@
           </div>
         </div>
       </div>
-    </div>
-
-    <!-- Action Buttons -->
-    <div class="flex flex-wrap items-center justify-center gap-4 pt-4">
-      <button (click)="recommencer()" class="px-5 py-2.5 rounded-xl border border-slate-300 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors">
-        Repasser le QCM
-      </button>
-      <a routerLink="/student/parcours" class="px-6 py-2.5 rounded-xl bg-[#1d4b99] hover:bg-[#153c80] text-white text-xs font-bold transition-colors shadow-sm">
-        Consulter ce parcours & préinscription &rarr;
-      </a>
-      <a routerLink="/student/dashboard" class="px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition-colors">
-        Retour au tableau de bord
-      </a>
     </div>
 
   </div>

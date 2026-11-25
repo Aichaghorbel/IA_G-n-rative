@@ -124,7 +124,7 @@ export class OrientationService {
     },
     {
       id: 'iit-licence',
-      nom: 'Licence en Technologie & Informatique',
+      nom: 'Licence',
       universite: 'IIT',
       type: 'Licence',
       duree: '3 ans',
@@ -136,7 +136,7 @@ export class OrientationService {
     },
     {
       id: 'iit-prepa',
-      nom: 'Cycle Préparatoire',
+      nom: 'Préparatoire',
       universite: 'IIT',
       type: 'Préparatoire',
       duree: '2 ans',
@@ -145,6 +145,18 @@ export class OrientationService {
       competences: ['Mathématiques supérieures & Analyse', 'Physique générale & Mécanique', 'Algorithmique & C/Python', 'Sciences industrielles de l’ingénieur'],
       recommandePour: ['Bac Scientifique / Technique', 'Rigueur analytique', 'Capacité de travail soutenue', 'Ambition d’ingénierie'],
       placesDisponibles: 80
+    },
+    {
+      id: 'iit-master',
+      nom: 'Mastère',
+      universite: 'IIT',
+      type: 'Master',
+      duree: '2 ans (Cours de soir)',
+      description: "Le Mastère Professionnel de l’IIT (dont le Master Industrie 4.0) forme des experts capables de piloter la transformation numérique, l’automatisation intelligente, l’IoT industriel et l’optimisation des systèmes de production. Conçu en cours de soir pour s’adapter aux professionnels et jeunes diplômés.",
+      debouches: ['Chef de Projet Industrie 4.0', 'Architecte Systèmes & IoT Industriel', 'Responsable Innovation & Transformation Digitale', 'Consultant en Ingénierie des Systèmes'],
+      competences: ['Industrie 4.0 & Usine Connectée', 'IA appliquée & Data Industrielle', 'Automatisation & Systèmes Embarqués', 'Gestion de projets technologiques'],
+      recommandePour: ['Diplômés Licence / Ingénieurs', 'Professionnels en reconversion ou montée en compétences', 'Intérêt pour l’innovation industrielle'],
+      placesDisponibles: 45
     },
     {
       id: 'isb-licence',

@@ -10,7 +10,25 @@ export const routes: Routes = [
   {
     path: '',
     pathMatch: 'full',
-    redirectTo: 'login'
+    loadComponent: () => import('./pages/acceuil/acceuil.component').then(m => m.AcceuilComponent)
+  },
+  {
+    path: 'acceuil',
+    loadComponent: () => import('./pages/acceuil/acceuil.component').then(m => m.AcceuilComponent)
+  },
+  {
+    path: 'chatbot',
+    data: { visitorMode: true },
+    loadComponent: () => import('./pages/student/chatbot/chatbot.component').then(m => m.ChatbotComponent)
+  },
+  {
+    path: 'preinscription',
+    loadComponent: () => import('./pages/student/preinscription/preinscription.component').then(m => m.PreinscriptionComponent)
+  },
+  {
+    path: 'formations',
+    data: { publicMode: true },
+    loadComponent: () => import('./pages/student/parcours/parcours.component').then(m => m.ParcoursComponent)
   },
   {
     path: '',

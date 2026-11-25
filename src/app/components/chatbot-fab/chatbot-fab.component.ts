@@ -5,6 +5,7 @@ import { LucideAngularModule } from 'lucide-angular';
 import { filter } from 'rxjs/operators';
 import { FormsModule } from '@angular/forms';
 import { ChatbotService, Message, MessageType, FormType } from '../../services/chatbot.service';
+import { AuthService } from '../../services/auth.service';
 
 // Web Speech API type declarations
 declare global {
@@ -24,6 +25,7 @@ declare global {
 export class ChatbotFabComponent implements OnDestroy {
   private router = inject(Router);
   private chatbotService = inject(ChatbotService);
+  private authService = inject(AuthService);
 
   isOnChatbotPage = signal<boolean>(false);
   isHovered = signal<boolean>(false);
@@ -74,7 +76,14 @@ export class ChatbotFabComponent implements OnDestroy {
 
   goToChatbot() {
     this.isOpen.set(false);
-    this.router.navigate(['/student/chatbot']);
+    const currentUrl = this.router.url.split('?')[0];
+    const isOnAcceuil = currentUrl === '/' || currentUrl === '/acceuil';
+    const isStudent = this.authService.user()?.role === 'student';
+    if (isOnAcceuil || !isStudent) {
+      this.router.navigate(['/chatbot'], { queryParams: { keepSession: '1' } });
+    } else {
+      this.router.navigate(['/student/chatbot']);
+    }
   }
 
   toggleChat() {

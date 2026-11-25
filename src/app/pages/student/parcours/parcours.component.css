@@ -1,3 +1,261 @@
+:host {
+  display: block;
+}
+
+/* === Bannière Bleu Nuit === */
+.catalog-banner {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #061024 0%, #0b1933 52%, #11244a 100%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.banner-grid {
+  position: absolute;
+  inset: 0;
+  opacity: 0.4;
+  background-image:
+    linear-gradient(to right, rgba(148, 163, 184, 0.08) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(148, 163, 184, 0.08) 1px, transparent 1px);
+  background-size: 56px 56px;
+  pointer-events: none;
+}
+
+.banner-orb {
+  position: absolute;
+  top: -96px;
+  right: 40px;
+  width: 360px;
+  height: 360px;
+  border-radius: 9999px;
+  background: rgba(29, 78, 216, 0.25);
+  filter: blur(95px);
+  pointer-events: none;
+  animation: orbDrift 14s ease-in-out infinite;
+}
+
+@keyframes orbDrift {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 0.72;
+  }
+  50% {
+    transform: translate3d(16px, -14px, 0) scale(1.06);
+    opacity: 0.92;
+  }
+}
+
+.banner-container {
+  position: relative;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 48px 32px 56px;
+}
+
+.banner-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 28px;
+}
+
+@media (min-width: 1024px) {
+  .banner-content {
+    flex-direction: row;
+    align-items: flex-end;
+  }
+}
+
+.banner-text {
+  max-width: 672px;
+}
+
+.banner-eyebrow {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: #67e8f9;
+  letter-spacing: 0.02em;
+}
+
+.banner-title {
+  margin: 8px 0 0;
+  font-size: clamp(30px, 4vw, 42px);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.025em;
+  color: #ffffff;
+}
+
+.banner-subtitle {
+  margin: 12px 0 0;
+  font-size: 15px;
+  line-height: 1.6;
+  color: #cbd5e1;
+}
+
+.banner-metrics {
+  margin-top: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 16px;
+  font-size: 13px;
+  color: #cbd5e1;
+  font-variant-numeric: tabular-nums;
+}
+
+.metric-strong {
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.metric-cyan {
+  font-weight: 700;
+  color: #67e8f9;
+}
+
+.metric-dot {
+  color: rgba(255, 255, 255, 0.25);
+}
+
+.school-switcher {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  padding: 6px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(6px);
+  gap: 4px;
+}
+
+@media (min-width: 1024px) {
+  .school-switcher {
+    align-self: flex-end;
+  }
+}
+
+.school-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: #e2e8f0;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.school-tab:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.school-tab.is-active {
+  background: #1d4ed8;
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(29, 78, 216, 0.35);
+}
+
+.tab-count {
+  font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, monospace;
+  font-size: 11px;
+  color: #94a3b8;
+  font-variant-numeric: tabular-nums;
+}
+
+.school-tab.is-active .tab-count {
+  color: #a5f3fc;
+}
+
+.carousel-header-wrap {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 40px 32px 0;
+}
+
+.carousel-header {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+@media (min-width: 640px) {
+  .carousel-header {
+    flex-direction: row;
+    align-items: flex-end;
+  }
+}
+
+.carousel-eyebrow {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: #1d4ed8;
+  letter-spacing: 0.02em;
+}
+
+.carousel-title {
+  margin: 4px 0 0;
+  font-size: clamp(22px, 2.5vw, 28px);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #0b1933;
+}
+
+.carousel-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.carousel-counter {
+  margin-right: 4px;
+  font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, monospace;
+  font-size: 12px;
+  color: #64748b;
+  font-variant-numeric: tabular-nums;
+}
+
+.nav-circle-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 9999px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  color: #0b1933;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.nav-circle-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.nav-circle-btn:hover:not(:disabled) {
+  background: #0b1933;
+  border-color: #0b1933;
+  color: #ffffff;
+}
+
+.nav-circle-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
 /* Container & scroll horizontal */
 .parcours-container {
   position: relative;
@@ -5,30 +263,35 @@
 }
 
 .parcours-grid {
-  display: flex;
-  overflow-x: auto;
-  gap: 2rem;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.5rem;
   padding-bottom: 2rem;
   padding-top: 0.5rem;
-  padding-left: 0.25rem;
-  padding-right: 0.25rem;
-  scroll-snap-type: x mandatory;
+}
+
+@media (max-width: 1024px) {
+  .parcours-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .parcours-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 /* 3D Flip Card Container */
 .flip-card {
   perspective: 1000px;
-  min-width: 380px;
-  max-width: 440px;
-  height: 540px;
-  flex-shrink: 0;
-  scroll-snap-align: start;
+  width: 100%;
+  height: 430px;
 }
 
 @media (max-width: 640px) {
   .flip-card {
-    min-width: 300px;
-    height: 520px;
+    height: 410px;
   }
 }
 

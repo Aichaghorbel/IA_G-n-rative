@@ -172,7 +172,7 @@ export class RegisterComponent {
   }
 
   get progressPercentage() {
-    return this.step() === 5 ? 100 : Math.round(((this.step() - 1) / 4) * 100);
+    return this.step() === 3 ? 100 : 50;
   }
   onlyNumbers(event: any, fieldName: keyof typeof this.formData) {
     const input = event.target;
@@ -191,18 +191,8 @@ export class RegisterComponent {
         return false;
       }
     } else if (s === 2) {
-      if (!this.formData.cinPassport || !this.formData.country || !this.formData.birthDate || !this.formData.sex || !this.formData.phone || !this.formData.address) {
+      if (!this.formData.cinPassport || !this.formData.country || !this.formData.birthDate || !this.formData.sex || !this.formData.phone || !this.formData.address || !this.formData.university) {
         this.error.set('Veuillez remplir toutes les informations personnelles.');
-        return false;
-      }
-    } else if (s === 3) {
-      if (!this.formData.lastDiploma || !this.formData.diplomaYear) {
-        this.error.set('Veuillez remplir les informations sur votre diplôme obtenu.');
-        return false;
-      }
-    } else if (s === 4) {
-      if (!this.formData.university || !this.formData.desiredDiploma || !this.formData.level || !this.formData.courseTime || !this.formData.knownBy) {
-        this.error.set('Veuillez remplir toutes les informations.');
         return false;
       }
     }
@@ -304,8 +294,7 @@ export class RegisterComponent {
 
   async handleSubmit(e?: Event) {
     if (e) e.preventDefault();
-    if (!this.formData.firstName || !this.formData.lastName || !this.formData.email || !this.formData.password) {
-      this.error.set('Veuillez renseigner votre Nom, Prénom, Email et Mot de passe.');
+    if (!this.validateStep()) {
       return;
     }
 
@@ -315,8 +304,8 @@ export class RegisterComponent {
         ...this.formData,
         role: 'student'
       });
-      // Redirection immédiate vers le tableau de bord candidat
-      this.router.navigate(['/student/dashboard']);
+      this.error.set('');
+      this.step.set(3);
     } catch (err: any) {
       this.error.set(err?.message || "Une erreur est survenue lors de l'inscription.");
     } finally {
@@ -325,6 +314,6 @@ export class RegisterComponent {
   }
 
   goToDashboard() {
-    this.router.navigate(['/student/dashboard']);
+    this.router.navigate(['/login']);
   }
 }
